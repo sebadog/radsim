@@ -10,4 +10,5 @@ export interface Case {
   created_at?: string;
   updated_at?: string;
   completed?: boolean;
+  survey_url?: string;
 }

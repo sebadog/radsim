@@ -13,7 +13,6 @@ export interface CaseFormData {
   additionalFindings: string[];
   summaryOfPathology: string;
   images: File[];
-  diagnosis: string;
   imageUrl: string;
   surveyUrl: string;
 }
@@ -66,7 +65,6 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 
   const newCase = {
     title,
-    diagnosis: caseData.diagnosis,
     accession_number: accessionNumber,
     clinical_info: clinicalInfo,
     expected_findings: expectedFindings,
@@ -108,7 +106,6 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
     .from('cases')
     .update({
       title,
-      diagnosis: caseData.diagnosis,
       clinical_info: clinicalInfo,
       expected_findings: expectedFindings,
       additional_findings: additionalFindings,

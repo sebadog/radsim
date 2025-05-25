@@ -16,7 +16,6 @@ const CaseForm: React.FC = () => {
     additionalFindings: [''],
     summaryOfPathology: '',
     images: [],
-    diagnosis: '',
     imageUrl: '',
     surveyUrl: ''
   });
@@ -49,7 +48,6 @@ const CaseForm: React.FC = () => {
         additionalFindings: caseData.additional_findings.length ? caseData.additional_findings : [''],
         summaryOfPathology: caseData.summary_of_pathology,
         images: [],
-        diagnosis: caseData.diagnosis || '',
         imageUrl: caseData.images?.[0] || '',
         surveyUrl: caseData.survey_url || ''
       });
@@ -164,12 +162,6 @@ const CaseForm: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const cleanedFormData = {
-        ...formData,
-        expectedFindings: formData.expectedFindings.filter(f => f.trim()),
-        additionalFindings: formData.additionalFindings.filter(f => f.trim())
-      };
-      
       if (isEditMode) {
         await updateCase(id!, formData);
       } else {
@@ -228,21 +220,6 @@ const CaseForm: React.FC = () => {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
               placeholder="Enter case title"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="diagnosis" className="block text-gray-700 font-medium mb-2">
-              Diagnosis
-            </label>
-            <input
-              type="text"
-              id="diagnosis"
-              name="diagnosis"
-              value={formData.diagnosis}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter diagnosis"
             />
           </div>
           
