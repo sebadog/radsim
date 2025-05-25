@@ -45,18 +45,36 @@ export async function fetchCaseById(id: string): Promise<Case | null> {
 }
 
 export async function createCase(caseData: CaseFormData): Promise<string> {
+  // Validate required fields according to RLS policy
+  if (!caseData.title || caseData.title.trim().length === 0) {
+    throw new Error('Title is required');
+  }
+  if (!caseData.clinicalInfo || caseData.clinicalInfo.trim().length === 0) {
+    throw new Error('Clinical information is required');
+  }
+  if (!caseData.expectedFindings || caseData.expectedFindings.length === 0) {
+    throw new Error('Expected findings are required');
+  }
+  if (!caseData.summaryOfPathology || caseData.summaryOfPathology.trim().length === 0) {
+    throw new Error('Summary of pathology is required');
+  }
+
+  // Remove any empty strings from arrays to satisfy RLS policy
+  const cleanExpectedFindings = caseData.expectedFindings.filter(finding => finding.trim().length > 0);
+  const cleanAdditionalFindings = caseData.additionalFindings.filter(finding => finding.trim().length > 0);
+  
   // Create image URLs from files (in a real app, these would be uploaded to storage)
   const imageUrls = caseData.images.map(file => URL.createObjectURL(file));
   
   const { data, error } = await supabase
     .from('cases')
     .insert({
-      title: caseData.title,
+      title: caseData.title.trim(),
       accession_number: Math.random().toString(36).substring(2, 12).toUpperCase(),
-      clinical_info: caseData.clinicalInfo,
-      expected_findings: caseData.expectedFindings,
-      additional_findings: caseData.additionalFindings,
-      summary_of_pathology: caseData.summaryOfPathology,
+      clinical_info: caseData.clinicalInfo.trim(),
+      expected_findings: cleanExpectedFindings,
+      additional_findings: cleanAdditionalFindings,
+      summary_of_pathology: caseData.summaryOfPathology.trim(),
       images: imageUrls
     })
     .select()
