@@ -24,17 +24,15 @@ interface FeedbackResponse {
   clueGiven: boolean;
 }
 
-const OPENROUTER_API_KEY = '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';
-
 export async function generateFeedback(request: FeedbackRequest): Promise<FeedbackResponse> {
   try {
-    // Get API key from environment variable or prompt user
+    // Get API key from environment variable
     const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
     
     if (!apiKey) {
       console.error('OpenRouter API key is missing');
       return {
-        feedback: "Error: OpenRouter API key is missing. Please add your API key to the .env file.",
+        feedback: "Error: OpenRouter API key is missing. Please check your environment variables.",
         score: null,
         showExpectedImpression: false,
         clueGiven: false
@@ -217,7 +215,7 @@ export async function generateResponseToClue(
     if (!apiKey) {
       console.error('OpenRouter API key is missing');
       return {
-        feedback: "Error: OpenRouter API key is missing. Please add your API key to the .env file.",
+        feedback: "Error: OpenRouter API key is missing. Please check your environment variables.",
         score: null,
         showExpectedImpression: false,
         clueGiven: false
