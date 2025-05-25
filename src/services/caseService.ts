@@ -62,6 +62,14 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   // Remove any empty strings from arrays to satisfy RLS policy
   const cleanExpectedFindings = caseData.expectedFindings.filter(finding => finding.trim().length > 0);
   const cleanAdditionalFindings = caseData.additionalFindings.filter(finding => finding.trim().length > 0);
+
+  // Ensure we have at least one expected finding after cleaning
+  if (cleanExpectedFindings.length === 0) {
+    throw new Error('At least one non-empty expected finding is required');
+  }
+  
+  // Generate a unique accession number (required by RLS policy)
+  const accessionNumber = `ACC${Date.now()}${Math.random().toString(36).substring(2, 7)}`.toUpperCase();
   
   // Create image URLs from files (in a real app, these would be uploaded to storage)
   const imageUrls = caseData.images.map(file => URL.createObjectURL(file));
@@ -70,12 +78,13 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     .from('cases')
     .insert({
       title: caseData.title.trim(),
-      accession_number: Math.random().toString(36).substring(2, 12).toUpperCase(),
+      accession_number: accessionNumber,
       clinical_info: caseData.clinicalInfo.trim(),
       expected_findings: cleanExpectedFindings,
       additional_findings: cleanAdditionalFindings,
       summary_of_pathology: caseData.summaryOfPathology.trim(),
-      images: imageUrls
+      images: imageUrls,
+      completed: false // Ensure completed field is set
     })
     .select()
     .single();
