@@ -37,7 +37,7 @@ function Dashboard() {
   const handleDeleteCase = async (id: string) => {
     if (deleteConfirm !== id) {
       setDeleteConfirm(id);
-      setTimeout(() => setDeleteConfirm(null), 3000); // Reset after 3 seconds
+      setTimeout(() => setDeleteConfirm(null), 3000);
       return;
     }
 
@@ -267,17 +267,17 @@ function Dashboard() {
                 <div className="space-y-2 mb-4">
                   {caseItem.diagnosis && (
                     <div className="flex items-center text-xs text-gray-600">
-                      <FileText size={14} className="mr-1" />
-                      <span>Diagnosis: {caseItem.diagnosis}</span>
+                      <FileText size={14} className="mr-1 flex-shrink-0" />
+                      <span className="truncate">Diagnosis: {caseItem.diagnosis}</span>
                     </div>
                   )}
                   <div className="flex items-center text-xs text-gray-600">
-                    <Calendar size={14} className="mr-1" />
-                    <span>ID: {caseItem.accession_number}</span>
+                    <Calendar size={14} className="mr-1 flex-shrink-0" />
+                    <span className="truncate">ID: {caseItem.accession_number}</span>
                   </div>
                   <div className="flex items-center text-xs text-gray-600">
-                    <User size={14} className="mr-1" />
-                    <span>{Array.isArray(caseItem.expected_findings) ? caseItem.expected_findings.length : 0} findings</span>
+                    <User size={14} className="mr-1 flex-shrink-0" />
+                    <span>{caseItem.expected_findings?.length || 0} findings</span>
                   </div>
                 </div>
                 
