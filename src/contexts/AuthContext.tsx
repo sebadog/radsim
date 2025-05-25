@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthUser, getCurrentUser } from '../services/authService';
 
 interface AuthContextType {
@@ -18,24 +18,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     async function loadUser() {
       try {
-        const user = await getCurrentUser();
-        setUser(user);
-        if (user) {
-          navigate('/');
+        const currentUser = await getCurrentUser();
+        setUser(currentUser);
+        
+        // Only redirect to home if we're on the auth page and user is logged in
+        if (currentUser && location.pathname === '/auth') {
+          navigate('/', { replace: true });
         }
       } catch (error) {
         console.error('Error loading user:', error);
+        setUser(null);
       } finally {
         setIsLoading(false);
       }
     }
 
     loadUser();
-  }, [navigate]);
+  }, [navigate, location.pathname]);
 
   return (
     <AuthContext.Provider value={{ user, isLoading, setUser }}>

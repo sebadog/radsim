@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Brain, LogOut, User } from 'lucide-react';
 import './App.css';
 import CaseViewer from './components/CaseViewer';
@@ -11,6 +11,7 @@ import { signOut } from './services/authService';
 
 function PrivateRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, isLoading } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -21,11 +22,11 @@ function PrivateRoute({ children, adminOnly = false }: { children: React.ReactNo
   }
 
   if (!user) {
-    return <Navigate to="/auth" />;
+    return <Navigate to="/auth" state={{ from: location }} replace />;
   }
 
   if (adminOnly && user.role !== 'admin') {
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -33,11 +34,20 @@ function PrivateRoute({ children, adminOnly = false }: { children: React.ReactNo
 
 function App() {
   const { user, setUser } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    if (!user && location.pathname !== '/auth') {
+      navigate('/auth', { replace: true });
+    }
+  }, [user, location.pathname, navigate]);
 
   const handleSignOut = async () => {
     try {
       await signOut();
       setUser(null);
+      navigate('/auth', { replace: true });
     } catch (error) {
       console.error('Error signing out:', error);
     }
