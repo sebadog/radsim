@@ -60,13 +60,18 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     throw new Error('Summary of pathology is required and cannot be empty');
   }
 
-  // Clean and validate expected findings
+  // Clean and validate expected findings - ensure it's not empty and contains no empty strings
   const cleanExpectedFindings = (caseData.expectedFindings || [])
     .map(finding => finding.trim())
     .filter(finding => finding.length > 0);
 
   if (!cleanExpectedFindings.length) {
     throw new Error('At least one non-empty expected finding is required');
+  }
+
+  // Validate that no empty strings exist in expected findings (required by RLS)
+  if (cleanExpectedFindings.some(finding => finding === '')) {
+    throw new Error('Expected findings cannot contain empty strings');
   }
 
   // Clean additional findings (optional)
@@ -82,21 +87,28 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   // Create image URLs array (empty if no images)
   const imageUrls = caseData.images ? caseData.images.map(file => URL.createObjectURL(file)) : [];
 
-  // Construct the case object exactly matching the database schema
+  // Construct the case object exactly matching the database schema and RLS requirements
   const newCase = {
     title,
     accession_number: accessionNumber,
     clinical_info: clinicalInfo,
     expected_findings: cleanExpectedFindings,
-    additional_findings: cleanAdditionalFindings || [], // Ensure it's never null
+    additional_findings: cleanAdditionalFindings,
     summary_of_pathology: summaryOfPathology,
     images: imageUrls,
     completed: false
   };
 
+  // Validate that all required fields meet the RLS policy requirements
+  if (!newCase.title || !newCase.accession_number || !newCase.clinical_info || 
+      !newCase.summary_of_pathology || !newCase.expected_findings || 
+      newCase.expected_findings.length === 0) {
+    throw new Error('All required fields must be provided and non-empty');
+  }
+
   const { data, error } = await supabase
     .from('cases')
-    .insert([newCase]) // Wrap in array to match Supabase's expected format
+    .insert([newCase])
     .select()
     .single();
 
