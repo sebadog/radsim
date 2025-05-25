@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
 import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
-import { generateFeedback } from '../services/openRouterService';
+import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
 
 function CaseViewer() {
   const { caseId } = useParams();
@@ -18,6 +18,7 @@ function CaseViewer() {
   // State for attempts
   const [firstAttempt, setFirstAttempt] = useState('');
   const [firstAttemptFeedback, setFirstAttemptFeedback] = useState<string | null>(null);
+  const [firstAttemptScore, setFirstAttemptScore] = useState<number | null>(null);
   const [secondAttempt, setSecondAttempt] = useState('');
   const [currentAttemptNumber, setCurrentAttemptNumber] = useState(1);
   
@@ -39,6 +40,7 @@ function CaseViewer() {
     // Reset state when case changes
     setFirstAttempt('');
     setFirstAttemptFeedback(null);
+    setFirstAttemptScore(null);
     setSecondAttempt('');
     setCurrentAttemptNumber(1);
     setFeedback(null);
@@ -91,22 +93,55 @@ function CaseViewer() {
     setIsLoading(true);
     
     try {
-      const result = await generateFeedback({
-        userImpression: currentAttemptText,
-        expectedFindings: currentCase?.expectedFindings || [],
-        caseTitle: currentCase?.title || '',
-        clinicalInfo: currentCase?.clinical_info || '',
-        summaryOfPathology: currentCase?.summary_of_pathology || ''
-      });
-      
       if (currentAttemptNumber === 1) {
+        const result = await generateFeedback({
+          userImpression: currentAttemptText,
+          expectedFindings: currentCase?.expectedFindings || [],
+          caseTitle: currentCase?.title || '',
+          clinicalInfo: currentCase?.clinical_info || '',
+          summaryOfPathology: currentCase?.summary_of_pathology || '',
+          accessionNumber: currentCase?.accession_number || '',
+          additionalFindings: currentCase?.additional_findings || [],
+          images: currentCase?.images || [],
+          completed: currentCase?.completed || false,
+          createdAt: currentCase?.created_at,
+          updatedAt: currentCase?.updated_at
+        });
+        
         setFirstAttemptFeedback(result.feedback);
-        setCurrentAttemptNumber(2);
+        setFirstAttemptScore(result.score);
+        
+        // If score is 100, show everything and skip second attempt
+        if (result.score === 100) {
+          setScore(result.score);
+          setShowExpectedImpression(true);
+          setShowTeachingPoints(true);
+        } else {
+          setCurrentAttemptNumber(2);
+        }
       } else {
+        const result = await generateSecondAttemptFeedback(
+          firstAttempt,
+          currentAttemptText,
+          {
+            userImpression: currentAttemptText,
+            expectedFindings: currentCase?.expectedFindings || [],
+            caseTitle: currentCase?.title || '',
+            clinicalInfo: currentCase?.clinical_info || '',
+            summaryOfPathology: currentCase?.summary_of_pathology || '',
+            accessionNumber: currentCase?.accession_number || '',
+            additionalFindings: currentCase?.additional_findings || [],
+            images: currentCase?.images || [],
+            completed: currentCase?.completed || false,
+            createdAt: currentCase?.created_at,
+            updatedAt: currentCase?.updated_at
+          }
+        );
+        
         setFeedback(result.feedback);
         setScore(result.score);
-        setShowExpectedImpression(result.score === 100);
-        setShowTeachingPoints(result.score === 100);
+        setShowExpectedImpression(true);
+        setShowTeachingPoints(true);
       }
     } catch (error: any) {
       console.error('Error submitting impression:', error);
