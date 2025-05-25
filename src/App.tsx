@@ -1,12 +1,13 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Brain } from 'lucide-react';
+import { Brain, LogOut, User } from 'lucide-react';
 import './App.css';
 import CaseViewer from './components/CaseViewer';
 import Dashboard from './components/Dashboard';
 import CaseForm from './components/CaseForm';
 import { Auth } from './components/Auth';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { signOut } from './services/authService';
 
 function PrivateRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { user, isLoading } = useAuth();
@@ -31,7 +32,16 @@ function PrivateRoute({ children, adminOnly = false }: { children: React.ReactNo
 }
 
 function App() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      setUser(null);
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -41,6 +51,24 @@ function App() {
             <h1 className="text-2xl font-bold flex items-center">
               <Brain className="mr-2" /> RadSim
             </h1>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center text-sm">
+                <User size={16} className="mr-2" />
+                <span>{user.email}</span>
+                {user.role === 'admin' && (
+                  <span className="ml-2 px-2 py-0.5 bg-blue-500 rounded-full text-xs">
+                    Admin
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="flex items-center px-3 py-1 bg-blue-500 rounded hover:bg-blue-400 transition-colors"
+              >
+                <LogOut size={16} className="mr-1" />
+                Sign Out
+              </button>
+            </div>
           </div>
         </header>
       )}
