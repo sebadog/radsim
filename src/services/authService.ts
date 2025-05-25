@@ -11,18 +11,51 @@ export interface AuthUser {
   role: 'user' | 'admin';
 }
 
-export async function signInWithGoogle() {
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback`
-    }
+export async function signUp(email: string, password: string): Promise<AuthUser | null> {
+  const { data: { user }, error } = await supabase.auth.signUp({
+    email,
+    password,
   });
 
   if (error) {
-    console.error('Error signing in with Google:', error.message);
+    console.error('Error signing up:', error.message);
     throw new Error(error.message);
   }
+
+  if (!user) return null;
+
+  return {
+    id: user.id,
+    email: user.email!,
+    role: 'user' // New users are always regular users by default
+  };
+}
+
+export async function signIn(email: string, password: string): Promise<AuthUser | null> {
+  const { data: { user }, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    console.error('Error signing in:', error.message);
+    throw new Error(error.message);
+  }
+
+  if (!user) return null;
+
+  // Get user role
+  const { data: roleData } = await supabase
+    .from('user_roles')
+    .select('role')
+    .eq('user_id', user.id)
+    .single();
+
+  return {
+    id: user.id,
+    email: user.email!,
+    role: roleData?.role || 'user'
+  };
 }
 
 export async function signOut() {
