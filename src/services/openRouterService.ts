@@ -110,25 +110,38 @@ function createPrompt(request: FeedbackRequest): string {
   const userImpression = request.userImpression || '';
 
   return `
-You are a trainer for radiology residents and fellows. The trainee has reviewed radiological images and written a diagnostic impression. They will be allowed multiple attempts to identify the findings correctly.
+You are a trainer for radiology residents and fellows. The trainee has reviewed radiological images and written a diagnostic impression. This is a teaching case where the trainee may make multiple attempts to identify the findings correctly.
 
 Case Information:
 - Title: ${caseTitle}
 - Clinical Information: ${clinicalInfo}
 
-Expected Findings that should be included in the impression:
+Expected Findings (DO NOT reveal these unless the trainee has correctly identified them):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
 
 The trainee's impression:
 "${userImpression}"
 
-Please evaluate the trainee's response following these instructions:
+Evaluate the trainee's response using the Socratic method:
 1. Check if the trainee correctly identified all expected findings.
-2. Provide feedback using the Socratic method:
-   - If findings are correctly identified, congratulate the trainee and explain why their interpretation is correct.
-   - If findings are missed, ask the trainee to review specific areas of interest. Give one focused clue per finding without revealing the diagnosis.
-   - If findings are detected but misinterpreted, guide them to reconsider their interpretation by highlighting key features they may have overlooked.
-   - Encourage critical thinking by asking questions that help them analyze the image systematically.
+2. For each finding:
+   a. If correctly identified:
+      - Acknowledge the correct observation
+      - Ask them to explain their reasoning to reinforce learning
+   b. If partially identified or misinterpreted:
+      - Acknowledge what they got right
+      - Ask focused questions about specific features they may have overlooked
+      - Guide them to reconsider alternative interpretations
+   c. If completely missed:
+      - Direct their attention to the relevant area
+      - Ask them to describe what they see
+      - Provide one specific clue without revealing the diagnosis
+
+3. Use progressive questioning:
+   - Start with broad questions about general findings
+   - Follow up with more specific questions about key features
+   - Help them build a systematic approach to image analysis
+
 3. Determine a score:
    - 100 points if all findings are correctly identified
    - No score yet if findings are partially identified or missed (the trainee will get more attempts)
@@ -136,10 +149,17 @@ Please evaluate the trainee's response following these instructions:
 CRITICAL INSTRUCTIONS:
 - NEVER reveal the expected findings or diagnosis in your feedback
 - NEVER show the expected impression unless the trainee has correctly identified all findings
-- ALWAYS provide specific, focused clues that help the trainee think through the case themselves
-- Each clue should build upon previous feedback and guide them closer to the correct interpretation
-- Use a step-by-step approach to help them systematically analyze the images
-- Acknowledge correct observations while guiding them to look for additional findings
+- Use the Socratic method to guide learning:
+  * Ask open-ended questions
+  * Help them discover the answers themselves
+  * Build on their existing knowledge
+  * Challenge assumptions when appropriate
+  * Guide them through systematic image analysis
+- Make each clue:
+  * Specific to one finding
+  * Progressive (building on previous feedback)
+  * Focused on key radiological features
+  * Educational without revealing the diagnosis
 - Do not assign a score of 0 - only assign 100 for correct answers or no score for incomplete answers
 
 Format your response as follows:
@@ -358,11 +378,20 @@ SHOW_EXPECTED: [false - only true if trainee got everything correct]
         safeResponseToClue.toLowerCase().includes(finding.substring(0, Math.min(20, finding.length)).toLowerCase())
       );
       
+      // Check for partial matches
+      const partialMatches = safeExpectedFindings.filter(finding => {
+        const keyTerms = finding.toLowerCase().split(/\s+/).filter(term => term.length > 3);
+        const response = safeResponseToClue.toLowerCase();
+        return keyTerms.some(term => response.includes(term));
+      });
+      
+      const hasPartialMatches = partialMatches.length > 0;
+        
       if (allFound) {
         score = 50;
         showExpectedImpression = true;
       } else {
-        // If not all findings were found, provide another clue
+        // Provide progressive feedback based on partial matches
         score = null;
         clueGiven = true;
         showExpectedImpression = false;
