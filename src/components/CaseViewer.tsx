@@ -232,7 +232,7 @@ function CaseViewer() {
             </h2>
             {currentCase.diagnosis && (
               <p className="text-sm text-gray-600 mt-1">
-                Diagnosis: {currentCase.diagnosis}
+                {currentCase.diagnosis}
               </p>
             )}
           </div>
