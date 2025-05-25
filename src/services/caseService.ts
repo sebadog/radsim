@@ -51,13 +51,13 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   const { data, error } = await supabase
     .from('cases')
     .insert({
-    title: caseData.title,
-    accession_number: Math.random().toString(36).substring(2, 12).toUpperCase(),
-    clinical_info: caseData.clinicalInfo,
-    expectedFindings: caseData.expectedFindings,
-    additionalFindings: caseData.additionalFindings,
-    summaryOfPathology: caseData.summaryOfPathology,
-    images: imageUrls
+      title: caseData.title,
+      accession_number: Math.random().toString(36).substring(2, 12).toUpperCase(),
+      clinical_info: caseData.clinicalInfo,
+      expected_findings: caseData.expectedFindings,
+      additional_findings: caseData.additionalFindings,
+      summary_of_pathology: caseData.summaryOfPathology,
+      images: imageUrls
     })
     .select()
     .single();
@@ -77,13 +77,13 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
   const { data, error } = await supabase
     .from('cases')
     .update({
-    title: caseData.title,
-    clinical_info: caseData.clinicalInfo,
-    expectedFindings: caseData.expectedFindings,
-    additionalFindings: caseData.additionalFindings,
-    summaryOfPathology: caseData.summaryOfPathology,
-    images: newImageUrls,
-    updated_at: new Date().toISOString()
+      title: caseData.title,
+      clinical_info: caseData.clinicalInfo,
+      expected_findings: caseData.expectedFindings,
+      additional_findings: caseData.additionalFindings,
+      summary_of_pathology: caseData.summaryOfPathology,
+      images: newImageUrls,
+      updated_at: new Date().toISOString()
     })
     .eq('id', id)
     .select()
