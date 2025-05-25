@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock } from 'lucide-react';
 import { fetchCases, deleteCase, markCaseAsCompleted } from '../services/caseService';
 import { Case } from '../types/case';
 
@@ -262,23 +262,6 @@ function Dashboard() {
               <div className="p-4 bg-white">
                 <div className="mb-3 text-sm text-gray-700 line-clamp-2 h-10">
                   {caseItem.clinical_info}
-                </div>
-                
-                <div className="space-y-2 mb-4">
-                  {caseItem.diagnosis && (
-                    <div className="flex items-center text-xs text-gray-600">
-                      <FileText size={14} className="mr-1 flex-shrink-0" />
-                      <span className="truncate">Diagnosis: {caseItem.diagnosis}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center text-xs text-gray-600">
-                    <Calendar size={14} className="mr-1 flex-shrink-0" />
-                    <span className="truncate">ID: {caseItem.accession_number}</span>
-                  </div>
-                  <div className="flex items-center text-xs text-gray-600">
-                    <User size={14} className="mr-1 flex-shrink-0" />
-                    <span>{caseItem.expected_findings?.length || 0} findings</span>
-                  </div>
                 </div>
                 
                 <div className="flex justify-between items-center mt-2">
