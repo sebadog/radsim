@@ -323,29 +323,17 @@ function CaseViewer() {
       </div>
 
       <div className="w-full max-w-2xl mx-auto">
-        {(firstAttemptScore !== null || totalScore > 0) && (
-          <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
-            <div className="flex items-center">
-              <Award className="text-blue-500 mr-2" size={24} />
-              <div>
-                <h3 className="font-medium text-blue-800">Your Score</h3>
-                <p className="text-blue-600">
-                  {firstAttemptScore === 100 ? (
-                    'Perfect score! 100/100'
-                  ) : totalScore > 0 ? (
-                    `Final score: ${totalScore}/100`
-                  ) : (
-                    `First attempt: ${firstAttemptScore}/100 - Try again for remaining points!`
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {firstAttemptFeedback && (
           <div className="mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">First Attempt:</h3>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-medium text-gray-700">First Attempt:</h3>
+              {firstAttemptScore !== null && (
+                <div className="flex items-center">
+                  <Award className="text-yellow-500 mr-1" size={18} />
+                  <span className="font-medium text-gray-700">Score: {firstAttemptScore}/100</span>
+                </div>
+              )}
+            </div>
             <div className="bg-gray-50 p-3 rounded mb-2">
               <p className="italic">{firstAttempt}</p>
             </div>
@@ -393,7 +381,17 @@ function CaseViewer() {
 
         {feedback && (
           <div className="mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Final Feedback:</h3>
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-medium text-gray-700">Final Feedback:</h3>
+              {score !== null && (
+                <div className="flex items-center">
+                  <Award className={`${score >= 70 ? 'text-yellow-500' : 'text-gray-400'} mr-1`} size={18} />
+                  <span className={`font-medium ${score >= 70 ? 'text-green-600' : 'text-gray-600'}`}>
+                    Final Score: {score}/100
+                  </span>
+                </div>
+              )}
+            </div>
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
               <div className="flex">
                 <MessageSquare className="text-blue-500 mr-2 flex-shrink-0 mt-1" />
