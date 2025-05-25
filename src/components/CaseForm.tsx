@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
-import { createCase, updateCase, fetchCaseById, CaseFormData } from '../services/caseService';
+import { createCase, updateCase, fetchCaseById, CaseFormData, supabase } from '../services/caseService';
 import { X, Upload, Plus, AlertTriangle, Save, ArrowLeft, Lock } from 'lucide-react';
 
 const CaseForm: React.FC = () => {
@@ -146,14 +146,6 @@ const CaseForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check authentication first
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      setError('Please sign in to create or edit cases');
-      return;
-    }
-    
     // Validate form
     if (!formData.title.trim()) {
       setError('Title is required');
@@ -185,8 +177,14 @@ const CaseForm: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
+
+      // Check authentication first
+      const { data: { session } } = await supabase.auth.getSession();
+    
+      if (!session) {
+        throw new Error('Please sign in to create or edit cases');
+      }
       
-      // Clean the form data
       const cleanedFormData = {
         ...formData,
         expectedFindings: formData.expectedFindings.filter(f => f.trim()),
@@ -200,7 +198,7 @@ const CaseForm: React.FC = () => {
       }
       
       navigate('/');
-    } catch (err: any) {
+    } catch (err) {
       console.error('Form submission error:', err);
       setError(err.message || 'Failed to save case');
       setLoading(false);
