@@ -67,33 +67,39 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   if (cleanExpectedFindings.length === 0) {
     throw new Error('At least one non-empty expected finding is required');
   }
-  
+
   // Generate a unique accession number (required by RLS policy)
-  const accessionNumber = `ACC${Date.now()}${Math.random().toString(36).substring(2, 7)}`.toUpperCase();
-  
-  // Create image URLs from files (in a real app, these would be uploaded to storage)
-  const imageUrls = caseData.images.map(file => URL.createObjectURL(file));
-  
+  const timestamp = Date.now();
+  const random = Math.random().toString(36).substring(2, 7).toUpperCase();
+  const accessionNumber = `ACC${timestamp}${random}`;
+
+  // Create image URLs array (empty if no images)
+  const imageUrls = caseData.images ? caseData.images.map(file => URL.createObjectURL(file)) : [];
+
+  const newCase = {
+    title: caseData.title.trim(),
+    accession_number: accessionNumber,
+    clinical_info: caseData.clinicalInfo.trim(),
+    expected_findings: cleanExpectedFindings,
+    additional_findings: cleanAdditionalFindings,
+    summary_of_pathology: caseData.summaryOfPathology.trim(),
+    images: imageUrls,
+    completed: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+
   const { data, error } = await supabase
     .from('cases')
-    .insert({
-      title: caseData.title.trim(),
-      accession_number: accessionNumber,
-      clinical_info: caseData.clinicalInfo.trim(),
-      expected_findings: cleanExpectedFindings,
-      additional_findings: cleanAdditionalFindings,
-      summary_of_pathology: caseData.summaryOfPathology.trim(),
-      images: imageUrls,
-      completed: false // Ensure completed field is set
-    })
+    .insert(newCase)
     .select()
     .single();
-  
+
   if (error) {
     console.error('Error creating case:', error);
-    throw new Error('Failed to create case');
+    throw new Error(`Failed to create case: ${error.message}`);
   }
-  
+
   return data.id;
 }
 
