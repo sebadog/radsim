@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
 import { fetchCases, deleteCase, markCaseAsCompleted } from '../services/caseService';
-import { Case } from '../data/cases';
+import { Case } from '../types/case';
 
 function Dashboard() {
   const [cases, setCases] = useState<Case[]>([]);
@@ -249,7 +249,9 @@ function Dashboard() {
             >
               {/* Card header with completion status */}
               <div className={`p-4 flex justify-between items-center ${caseItem.completed ? 'bg-green-100' : 'bg-white'}`}>
-                <h3 className="font-semibold text-lg text-gray-800">{caseItem.title}</h3>
+                <h3 className="font-semibold text-lg text-gray-800">
+                  {caseItem.case_number ? `Case ${caseItem.case_number}: ` : ''}{caseItem.title}
+                </h3>
                 <button
                   onClick={(e) => handleToggleCompleted(e, caseItem.id, caseItem.completed || false)}
                   className={`p-2 rounded-full transition-colors duration-200 ${
@@ -266,19 +268,41 @@ function Dashboard() {
               {/* Card body */}
               <div className="p-4 bg-white">
                 <div className="mb-3 text-sm text-gray-700 line-clamp-2 h-10">
-                  {caseItem.clinicalInfo}
+                  {caseItem.clinical_info}
                 </div>
                 
                 {/* Case metadata */}
-                <div className="flex flex-wrap gap-2 mb-4">
+                <div className="space-y-2 mb-4">
+                  {caseItem.diagnosis && (
+                    <div className="flex items-center text-xs text-gray-600">
+                      <FileText size={14} className="mr-1" />
+                      <span>Diagnosis: {caseItem.diagnosis}</span>
+                    </div>
+                  )}
                   <div className="flex items-center text-xs text-gray-600">
                     <Calendar size={14} className="mr-1" />
-                    <span>ID: {caseItem.accessionNumber}</span>
+                    <span>ID: {caseItem.accession_number}</span>
                   </div>
                   <div className="flex items-center text-xs text-gray-600">
                     <User size={14} className="mr-1" />
-                    <span>{Array.isArray(caseItem.expectedFindings) ? caseItem.expectedFindings.length : 0} findings</span>
+                    <span>{Array.isArray(caseItem.expected_findings) ? caseItem.expected_findings.length : 0} findings</span>
                   </div>
+                  {caseItem.images && caseItem.images.length > 0 && (
+                    <div className="flex items-center text-xs text-blue-600 hover:text-blue-800">
+                      <FileImage size={14} className="mr-1" />
+                      <a href={caseItem.images[0]} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                        View Image <ExternalLink size={12} className="ml-1" />
+                      </a>
+                    </div>
+                  )}
+                  {caseItem.survey_url && (
+                    <div className="flex items-center text-xs text-blue-600 hover:text-blue-800">
+                      <FormInput size={14} className="mr-1" />
+                      <a href={caseItem.survey_url} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                        Take Survey <ExternalLink size={12} className="ml-1" />
+                      </a>
+                    </div>
+                  )}
                 </div>
                 
                 {/* Action buttons */}
