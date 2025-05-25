@@ -26,7 +26,7 @@ const CaseForm: React.FC = () => {
   useEffect(() => {
     // Redirect if not admin
     if (user && user.role !== 'admin') {
-      navigate('/');
+      navigate('/', { replace: true });
       return;
     }
 
