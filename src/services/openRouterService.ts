@@ -92,7 +92,7 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 400
       })
     });
 
@@ -308,7 +308,7 @@ SHOW_EXPECTED: true`;
           }
         ],
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 400
       })
     });
 
