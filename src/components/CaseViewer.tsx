@@ -150,7 +150,7 @@ function CaseViewer() {
         userImpression,
         expectedFindings: currentCase?.expectedFindings || [],
         caseTitle: currentCase?.title || '',
-        clinicalInfo: currentCase?.clinicalInfo || '',
+        clinicalInfo: currentCase?.clinical_info || '',
         summaryOfPathology: currentCase?.summaryOfPathology || ''
       });
       
@@ -199,7 +199,7 @@ function CaseViewer() {
         responseToClue,
         currentCase?.expectedFindings || [],
         currentCase?.title || '',
-        currentCase?.clinicalInfo || '',
+        currentCase?.clinical_info || '',
         currentCase?.summaryOfPathology || ''
       );
       
@@ -338,7 +338,7 @@ function CaseViewer() {
 
       <div className="mb-4">
         <h3 className="font-medium text-gray-700 mb-2">Clinical Information:</h3>
-        <p className="bg-gray-50 p-3 rounded">{currentCase?.clinicalInfo}</p>
+        <p className="bg-gray-50 p-3 rounded">{currentCase?.clinical_info}</p>
       </div>
 
       <div className="w-full max-w-2xl mx-auto text-left">
