@@ -49,7 +49,7 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
-  
+
   if (!title || title.length === 0) {
     throw new Error('Title is required and cannot be empty');
   }
@@ -67,11 +67,6 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 
   if (!cleanExpectedFindings.length) {
     throw new Error('At least one non-empty expected finding is required');
-  }
-
-  // Validate that no empty strings exist in expected findings (required by RLS)
-  if (cleanExpectedFindings.some(finding => finding === '')) {
-    throw new Error('Expected findings cannot contain empty strings');
   }
 
   // Clean additional findings (optional)
@@ -99,13 +94,6 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     completed: false
   };
 
-  // Validate that all required fields meet the RLS policy requirements
-  if (!newCase.title || !newCase.accession_number || !newCase.clinical_info || 
-      !newCase.summary_of_pathology || !newCase.expected_findings || 
-      newCase.expected_findings.length === 0) {
-    throw new Error('All required fields must be provided and non-empty');
-  }
-
   const { data, error } = await supabase
     .from('cases')
     .insert([newCase])
@@ -121,17 +109,41 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 }
 
 export async function updateCase(id: string, caseData: CaseFormData): Promise<string> {
+  // Validate required fields
+  const title = caseData.title?.trim();
+  const clinicalInfo = caseData.clinicalInfo?.trim();
+  const summaryOfPathology = caseData.summaryOfPathology?.trim();
+
+  if (!title || title.length === 0) {
+    throw new Error('Title is required and cannot be empty');
+  }
+  if (!clinicalInfo || clinicalInfo.length === 0) {
+    throw new Error('Clinical information is required and cannot be empty');
+  }
+  if (!summaryOfPathology || summaryOfPathology.length === 0) {
+    throw new Error('Summary of pathology is required and cannot be empty');
+  }
+
+  // Clean and validate findings
+  const cleanExpectedFindings = (caseData.expectedFindings || [])
+    .map(finding => finding.trim())
+    .filter(finding => finding.length > 0);
+
+  const cleanAdditionalFindings = (caseData.additionalFindings || [])
+    .map(finding => finding.trim())
+    .filter(finding => finding.length > 0);
+
   // Create image URLs from files (in a real app, these would be uploaded to storage)
   const newImageUrls = caseData.images.map(file => URL.createObjectURL(file));
   
   const { data, error } = await supabase
     .from('cases')
     .update({
-      title: caseData.title,
-      clinical_info: caseData.clinicalInfo,
-      expected_findings: caseData.expectedFindings,
-      additional_findings: caseData.additionalFindings,
-      summary_of_pathology: caseData.summaryOfPathology,
+      title,
+      clinical_info: clinicalInfo,
+      expected_findings: cleanExpectedFindings,
+      additional_findings: cleanAdditionalFindings,
+      summary_of_pathology: summaryOfPathology,
       images: newImageUrls,
       updated_at: new Date().toISOString()
     })
