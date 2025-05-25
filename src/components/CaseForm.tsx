@@ -16,7 +16,6 @@ const CaseForm: React.FC = () => {
     additionalFindings: [''],
     summaryOfPathology: '',
     images: [],
-    caseNumber: null,
     diagnosis: '',
     imageUrl: '',
     surveyUrl: ''
@@ -50,7 +49,6 @@ const CaseForm: React.FC = () => {
         additionalFindings: caseData.additional_findings.length ? caseData.additional_findings : [''],
         summaryOfPathology: caseData.summary_of_pathology,
         images: [],
-        caseNumber: caseData.case_number || null,
         diagnosis: caseData.diagnosis || '',
         imageUrl: caseData.images?.[0] || '',
         surveyUrl: caseData.survey_url || ''
@@ -142,7 +140,6 @@ const CaseForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate form
     if (!formData.title.trim()) {
       setError('Title is required');
       return;
@@ -218,37 +215,20 @@ const CaseForm: React.FC = () => {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="text-left space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label htmlFor="caseNumber" className="block text-gray-700 font-medium mb-2">
-                Case Number
-              </label>
-              <input
-                type="number"
-                id="caseNumber"
-                name="caseNumber"
-                value={formData.caseNumber || ''}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter case number"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="title" className="block text-gray-700 font-medium mb-2">
-                Case Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                placeholder="Enter case title"
-              />
-            </div>
+          <div>
+            <label htmlFor="title" className="block text-gray-700 font-medium mb-2">
+              Case Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+              placeholder="Enter case title"
+            />
           </div>
 
           <div>

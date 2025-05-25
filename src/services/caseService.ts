@@ -13,7 +13,6 @@ export interface CaseFormData {
   additionalFindings: string[];
   summaryOfPathology: string;
   images: File[];
-  caseNumber: number | null;
   diagnosis: string;
   imageUrl: string;
   surveyUrl: string;
@@ -55,12 +54,10 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   const expectedFindings = caseData.expectedFindings.filter(f => f.trim());
   const additionalFindings = caseData.additionalFindings.filter(f => f.trim());
 
-  // Generate a unique accession number
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 7).toUpperCase();
   const accessionNumber = `ACC${timestamp}${random}`;
 
-  // Use the provided image URL or placeholder
   const imageUrls = caseData.imageUrl 
     ? [caseData.imageUrl]
     : caseData.images.length > 0 
@@ -69,7 +66,6 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 
   const newCase = {
     title,
-    case_number: caseData.caseNumber,
     diagnosis: caseData.diagnosis,
     accession_number: accessionNumber,
     clinical_info: clinicalInfo,
@@ -102,7 +98,6 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
   const expectedFindings = caseData.expectedFindings.filter(f => f.trim());
   const additionalFindings = caseData.additionalFindings.filter(f => f.trim());
 
-  // Use the provided image URL or existing images
   const imageUrls = caseData.imageUrl 
     ? [caseData.imageUrl]
     : caseData.images.length > 0 
@@ -113,7 +108,6 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
     .from('cases')
     .update({
       title,
-      case_number: caseData.caseNumber,
       diagnosis: caseData.diagnosis,
       clinical_info: clinicalInfo,
       expected_findings: expectedFindings,
