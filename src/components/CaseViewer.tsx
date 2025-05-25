@@ -230,11 +230,6 @@ function CaseViewer() {
             <h2 className="text-xl font-semibold">
               {currentCase.case_number ? `Case ${currentCase.case_number}: ` : ''}{currentCase.title}
             </h2>
-            {currentCase.diagnosis && (
-              <p className="text-sm text-gray-600 mt-1">
-                {currentCase.diagnosis}
-              </p>
-            )}
           </div>
           
           {currentCase.completed && (
