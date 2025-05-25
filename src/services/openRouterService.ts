@@ -374,15 +374,15 @@ SHOW_EXPECTED: [false - only true if trainee got everything correct]
     
     // If the LLM didn't follow the format, make a best guess
     if (score === null) {
-      const allFound = safeExpectedFindings.every(finding => 
-        safeResponseToClue.toLowerCase().includes(finding.substring(0, Math.min(20, finding.length)).toLowerCase())
+        currentCase?.clinicalInfo || currentCase?.clinical_info || '',
+        currentCase?.summaryOfPathology || currentCase?.summary_of_pathology || ''
       );
       
       // Check for partial matches
       const partialMatches = safeExpectedFindings.filter(finding => {
         const keyTerms = finding.toLowerCase().split(/\s+/).filter(term => term.length > 3);
-        const response = safeResponseToClue.toLowerCase();
-        return keyTerms.some(term => response.includes(term));
+        clinicalInfo: currentCase?.clinicalInfo || currentCase?.clinical_info || '',
+        summaryOfPathology: currentCase?.summaryOfPathology || currentCase?.summary_of_pathology || ''
       });
       
       const hasPartialMatches = partialMatches.length > 0;

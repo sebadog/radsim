@@ -338,7 +338,7 @@ function CaseViewer() {
 
       <div className="mb-4">
         <h3 className="font-medium text-gray-700 mb-2">Clinical Information:</h3>
-        <p className="bg-gray-50 p-3 rounded">{currentCase?.clinical_info}</p>
+        <p className="bg-gray-50 p-3 rounded">{currentCase?.clinicalInfo || currentCase?.clinical_info}</p>
       </div>
 
       <div className="w-full max-w-2xl mx-auto text-left">
@@ -448,7 +448,7 @@ function CaseViewer() {
                 <h3 className="font-medium text-gray-700 mb-2">Teaching Points:</h3>
                 <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
                   <h4 className="font-medium mb-2">Summary of Pathology:</h4>
-                  <p className="mb-4">{currentCase?.summary_of_pathology}</p>
+                  <p className="mb-4">{currentCase?.summaryOfPathology || currentCase?.summary_of_pathology}</p>
                 </div>
               </div>
             )}
