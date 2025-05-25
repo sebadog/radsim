@@ -250,6 +250,7 @@ function CaseViewer() {
                   ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
             }`}
+            title={currentCase.completed ? "Mark case as incomplete" : "Mark case as completed"}
           >
             {completionUpdating ? (
               <Loader2 size={16} className="mr-1.5 animate-spin" />
@@ -258,7 +259,11 @@ function CaseViewer() {
             ) : (
               <CheckCircle size={16} className="mr-1.5" />
             )}
-            {currentCase.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
+            {completionUpdating 
+              ? 'Updating...' 
+              : currentCase.completed 
+                ? 'Completed' 
+                : 'Complete Case'}
           </button>
           
           <button 
