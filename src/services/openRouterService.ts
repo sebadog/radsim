@@ -103,18 +103,24 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
 }
 
 function createPrompt(request: FeedbackRequest): string {
+  // Add safety checks for undefined or null values
+  const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
+  const caseTitle = request.caseTitle || 'Untitled Case';
+  const clinicalInfo = request.clinicalInfo || 'No clinical information provided';
+  const userImpression = request.userImpression || '';
+
   return `
 You are a trainer for radiology residents and fellows. The trainee has reviewed radiological images and written a diagnostic impression. 
 
 Case Information:
-- Title: ${request.caseTitle}
-- Clinical Information: ${request.clinicalInfo}
+- Title: ${caseTitle}
+- Clinical Information: ${clinicalInfo}
 
 Expected Findings that should be included in the impression:
-${request.expectedFindings.map(finding => `- ${finding}`).join('\n')}
+${expectedFindings.map(finding => `- ${finding}`).join('\n')}
 
 The trainee's impression:
-"${request.userImpression}"
+"${userImpression}"
 
 Please evaluate the trainee's response following these instructions:
 1. Check if the trainee correctly identified all expected findings.
@@ -172,8 +178,11 @@ function parseLLMResponse(response: string, request: FeedbackRequest): FeedbackR
   
   // If the LLM didn't follow the format, make a best guess
   if (score === null) {
+    // Add safety check for expectedFindings
+    const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
+    
     // Check if all expected findings are mentioned in the user impression
-    const allFound = request.expectedFindings.every(finding => 
+    const allFound = expectedFindings.every(finding => 
       request.userImpression.toLowerCase().includes(finding.substring(0, Math.min(20, finding.length)).toLowerCase())
     );
     
@@ -222,21 +231,28 @@ export async function generateResponseToClue(
       };
     }
 
+    // Add safety checks for undefined or null values
+    const safeExpectedFindings = Array.isArray(expectedFindings) ? expectedFindings : [];
+    const safeCaseTitle = caseTitle || 'Untitled Case';
+    const safeClinicalInfo = clinicalInfo || 'No clinical information provided';
+    const safeInitialImpression = initialImpression || '';
+    const safeResponseToClue = responseToClue || '';
+
     const prompt = `
 You are a trainer for radiology residents and fellows. The trainee has reviewed radiological images and written a diagnostic impression. After receiving a clue, they have provided an updated impression.
 
 Case Information:
-- Title: ${caseTitle}
-- Clinical Information: ${clinicalInfo}
+- Title: ${safeCaseTitle}
+- Clinical Information: ${safeClinicalInfo}
 
 Expected Findings that should be included in the impression:
-${expectedFindings.map(finding => `- ${finding}`).join('\n')}
+${safeExpectedFindings.map(finding => `- ${finding}`).join('\n')}
 
 The trainee's initial impression:
-"${initialImpression}"
+"${safeInitialImpression}"
 
 After receiving a clue, the trainee's updated impression:
-"${responseToClue}"
+"${safeResponseToClue}"
 
 Please evaluate the trainee's updated response following these instructions:
 1. Check if the trainee now correctly identified all expected findings.
@@ -329,8 +345,8 @@ SHOW_EXPECTED: [false - only true if trainee got everything correct]
     
     // If the LLM didn't follow the format, make a best guess
     if (score === null) {
-      const allFound = expectedFindings.every(finding => 
-        responseToClue.toLowerCase().includes(finding.substring(0, Math.min(20, finding.length)).toLowerCase())
+      const allFound = safeExpectedFindings.every(finding => 
+        safeResponseToClue.toLowerCase().includes(finding.substring(0, Math.min(20, finding.length)).toLowerCase())
       );
       
       if (allFound) {
