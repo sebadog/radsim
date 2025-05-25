@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useDropzone } from 'react-dropzone';
-import { createCase, updateCase, fetchCaseById, CaseFormData, supabase } from '../services/caseService';
+import { createCase, updateCase, fetchCaseById, CaseFormData } from '../services/caseService';
 import { X, Upload, Plus, AlertTriangle, Save, ArrowLeft, Lock } from 'lucide-react';
 
 const CaseForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = !!id;
   const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Check if we're coming from the dashboard with authentication
-  const isAuthenticated = location.state?.isAuthenticated || false;
   
   const [formData, setFormData] = useState<CaseFormData>({
     title: '',
@@ -26,15 +22,12 @@ const CaseForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [showPasswordModal, setShowPasswordModal] = useState(!isAuthenticated);
-  const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState<string | null>(null);
   
   useEffect(() => {
-    if (isEditMode && !showPasswordModal) {
+    if (isEditMode) {
       loadCase();
     }
-  }, [id, isEditMode, showPasswordModal]);
+  }, [id, isEditMode]);
   
   const loadCase = async () => {
     try {
@@ -177,13 +170,6 @@ const CaseForm: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-
-      // Check authentication first
-      const { data: { session } } = await supabase.auth.getSession();
-    
-      if (!session) {
-        throw new Error('Please sign in to create or edit cases');
-      }
       
       const cleanedFormData = {
         ...formData,
@@ -205,72 +191,6 @@ const CaseForm: React.FC = () => {
     }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password === 'admin') {
-      setShowPasswordModal(false);
-      setPasswordError(null);
-    } else {
-      setPasswordError('Incorrect password. Please try again.');
-    }
-  };
-  
-  if (showPasswordModal) {
-    return (
-      <div className="p-6 mb-6 flex flex-col items-center justify-center min-h-[400px]">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <div className="flex items-center justify-center mb-6">
-            <Lock className="text-blue-600 mr-2" size={24} />
-            <h2 className="text-xl font-semibold">Authentication Required</h2>
-          </div>
-          
-          <p className="text-gray-600 mb-6 text-center">
-            Please enter the administrator password to {isEditMode ? 'edit' : 'create'} a case.
-          </p>
-          
-          {passwordError && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4">
-              <p className="text-red-700 text-sm">{passwordError}</p>
-            </div>
-          )}
-          
-          <form onSubmit={handlePasswordSubmit}>
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-                autoFocus
-              />
-            </div>
-            
-            <div className="flex justify-between">
-              <button
-                type="button"
-                onClick={() => navigate('/')}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Submit
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
   
   return (
     <div className="p-6 mb-6">
