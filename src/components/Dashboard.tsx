@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock } from 'lucide-react';
 import { fetchCases, deleteCase, markCaseAsCompleted } from '../services/caseService';
 import { Case } from '../types/case';
+import { useAuth } from '../contexts/AuthContext';
 
 function Dashboard() {
   const [cases, setCases] = useState<Case[]>([]);
@@ -16,6 +17,8 @@ function Dashboard() {
   const [actionAfterAuth, setActionAfterAuth] = useState<{type: 'edit' | 'delete', id: string} | null>(null);
   
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     const loadCases = async () => {
@@ -35,24 +38,31 @@ function Dashboard() {
   }, []);
 
   const handleDeleteCase = async (id: string) => {
+    if (!isAdmin) return;
+    
     if (deleteConfirm !== id) {
       setDeleteConfirm(id);
       setTimeout(() => setDeleteConfirm(null), 3000);
       return;
     }
 
-    setActionAfterAuth({type: 'delete', id});
-    setShowPasswordModal(true);
+    try {
+      await deleteCase(id);
+      setCases(cases.filter(c => c.id !== id));
+      setDeleteConfirm(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete case');
+    }
   };
 
   const handleEditCase = (id: string) => {
-    setActionAfterAuth({type: 'edit', id});
-    setShowPasswordModal(true);
+    if (!isAdmin) return;
+    navigate(`/cases/edit/${id}`);
   };
 
   const handleAddNewCase = () => {
-    setActionAfterAuth({type: 'edit', id: 'new'});
-    setShowPasswordModal(true);
+    if (!isAdmin) return;
+    navigate('/cases/new');
   };
 
   const handleToggleCompleted = async (e: React.MouseEvent, id: string, currentStatus: boolean) => {
@@ -67,42 +77,6 @@ function Dashboard() {
     }
   };
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password === 'admin') {
-      setShowPasswordModal(false);
-      setPasswordError(null);
-      
-      if (actionAfterAuth) {
-        if (actionAfterAuth.type === 'delete') {
-          performDelete(actionAfterAuth.id);
-        } else if (actionAfterAuth.type === 'edit') {
-          if (actionAfterAuth.id === 'new') {
-            navigate('/cases/new', { state: { isAuthenticated: true } });
-          } else {
-            navigate(`/cases/edit/${actionAfterAuth.id}`, { state: { isAuthenticated: true } });
-          }
-        }
-      }
-      
-      setPassword('');
-      setActionAfterAuth(null);
-    } else {
-      setPasswordError('Incorrect password. Please try again.');
-    }
-  };
-
-  const performDelete = async (id: string) => {
-    try {
-      await deleteCase(id);
-      setCases(cases.filter(c => c.id !== id));
-      setDeleteConfirm(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete case');
-    }
-  };
-
   const filteredCases = cases.filter(c => {
     if (filter === 'all') return true;
     if (filter === 'completed') return c.completed;
@@ -112,66 +86,6 @@ function Dashboard() {
 
   return (
     <div className="p-6 mb-6 w-full">
-      {showPasswordModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <div className="flex items-center justify-center mb-4">
-              <Lock className="text-blue-600 mr-2" size={24} />
-              <h3 className="text-xl font-semibold">Authentication Required</h3>
-            </div>
-            
-            <p className="text-gray-600 mb-4 text-center">
-              Please enter the administrator password to continue.
-            </p>
-            
-            {passwordError && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-4">
-                <p className="text-red-700 text-sm">{passwordError}</p>
-              </div>
-            )}
-            
-            <form onSubmit={handlePasswordSubmit}>
-              <div className="mb-4">
-                <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                  autoFocus
-                />
-              </div>
-              
-              <div className="flex justify-between">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowPasswordModal(false);
-                    setPasswordError(null);
-                    setPassword('');
-                    setActionAfterAuth(null);
-                    setDeleteConfirm(null);
-                  }}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                >
-                  Submit
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
         <h2 className="text-2xl font-semibold">Cases</h2>
         <div className="flex flex-col md:flex-row gap-4">
@@ -195,12 +109,14 @@ function Dashboard() {
               Incomplete
             </button>
           </div>
-          <button 
-            onClick={handleAddNewCase}
-            className="flex items-center px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-          >
-            <Plus className="mr-1" size={18} /> Add New Case
-          </button>
+          {isAdmin && (
+            <button 
+              onClick={handleAddNewCase}
+              className="flex items-center px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            >
+              <Plus className="mr-1" size={18} /> Add New Case
+            </button>
+          )}
         </div>
       </div>
 
@@ -224,7 +140,7 @@ function Dashboard() {
                 ? 'No completed cases found' 
                 : 'No incomplete cases found'}
           </p>
-          {filter === 'all' && (
+          {isAdmin && filter === 'all' && (
             <button 
               onClick={handleAddNewCase}
               className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -272,32 +188,35 @@ function Dashboard() {
                     <FileText size={16} className="mr-1.5" /> View Case
                   </Link>
                   
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={() => handleEditCase(caseItem.id)}
-                      className="p-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
-                      title="Edit"
-                    >
-                      <Edit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCase(caseItem.id)}
-                      className={`p-1.5 rounded transition-colors ${
-                        deleteConfirm === caseItem.id
-                          ? 'bg-red-500 text-white animate-pulse'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      title={deleteConfirm === caseItem.id ? 'Click again to confirm delete' : 'Delete'}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                  {isAdmin && (
+                    <div className="flex space-x-2">
+                      <button 
+                        onClick={() => handleEditCase(caseItem.id)}
+                        className="p-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                        title="Edit"
+                      >
+                        <Edit size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteCase(caseItem.id)}
+                        className={`p-1.5 rounded transition-colors ${
+                          deleteConfirm === caseItem.id
+                            ? 'bg-red-500 text-white animate-pulse'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                        title={deleteConfirm === caseItem.id ? 'Click again to confirm delete' : 'Delete'}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
               
               {caseItem.completed && (
                 <div className="py-2 px-4 bg-green-100 text-green-800 text-sm font-medium flex items-center justify-center">
-                  <CheckCircle size={16} className="mr-1.5" /> Completed
+                  <CheckCircle className="mr-1.5" size={16} />
+                  Completed
                 </div>
               )}
             </div>
