@@ -277,7 +277,7 @@ function Dashboard() {
                   </div>
                   <div className="flex items-center text-xs text-gray-600">
                     <User size={14} className="mr-1" />
-                    <span>{caseItem.expectedFindings.length} findings</span>
+                    <span>{Array.isArray(caseItem.expectedFindings) ? caseItem.expectedFindings.length : 0} findings</span>
                   </div>
                 </div>
                 
