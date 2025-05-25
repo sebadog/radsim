@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -10,6 +11,7 @@ export function Auth() {
   const [loading, setLoading] = useState(false);
   
   const { setUser } = useAuth();
+  const navigate = useNavigate();
 
   const validatePassword = (password: string): string | null => {
     if (password.length < 6) {
@@ -22,7 +24,6 @@ export function Auth() {
     e.preventDefault();
     setError(null);
 
-    // Validate password before submission
     if (isSignUp) {
       const passwordError = validatePassword(password);
       if (passwordError) {
@@ -39,8 +40,8 @@ export function Auth() {
         : await signIn(email, password);
       
       setUser(user);
+      navigate('/'); // Redirect to dashboard immediately after successful auth
     } catch (err: any) {
-      // Handle specific error cases
       if (err.message.includes('already registered')) {
         setError('This email is already registered. Please sign in instead.');
       } else {
