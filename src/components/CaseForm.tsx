@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AlertTriangle, Save, ArrowLeft } from 'lucide-react';
 import { createCase, updateCase, fetchCaseById, CaseFormData } from '../services/caseService';
+import { useAuth } from '../contexts/AuthContext';
 
 const CaseForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const isEditMode = !!id;
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [formData, setFormData] = useState<CaseFormData>({
     title: '',
@@ -22,10 +24,16 @@ const CaseForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
+    // Redirect if not admin
+    if (user && user.role !== 'admin') {
+      navigate('/');
+      return;
+    }
+
     if (isEditMode) {
       loadCase();
     }
-  }, [id, isEditMode]);
+  }, [id, isEditMode, user, navigate]);
   
   const loadCase = async () => {
     try {
@@ -99,6 +107,7 @@ const CaseForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate form
     if (!formData.title.trim()) {
       setError('Title is required');
       return;
@@ -129,11 +138,10 @@ const CaseForm: React.FC = () => {
         await createCase(formData);
       }
       
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (err: any) {
       console.error('Form submission error:', err);
       setError(err.message || 'Failed to save case');
-    } finally {
       setLoading(false);
     }
   };
