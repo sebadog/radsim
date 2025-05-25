@@ -44,7 +44,31 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
       };
     }
 
-    const prompt = createPrompt(request);
+    const prompt = `
+You are a radiology expert grading a trainee's response. Follow these scoring rules strictly:
+
+1. Each case has one or multiple diagnoses (findings)
+2. Total points are 100, divided by the number of findings
+3. Full points for correct detection AND interpretation of each finding
+4. No points for incorrect or missing findings (they can try again)
+
+Case Information:
+Title: ${request.caseTitle}
+Clinical Information: ${request.clinicalInfo}
+Expected Findings: ${request.expectedFindings.join(', ')}
+
+Trainee's impression:
+"${request.userImpression}"
+
+Calculate the score based on:
+- Number of findings: ${request.expectedFindings.length}
+- Points per finding: ${Math.floor(100 / request.expectedFindings.length)}
+
+Format your response as:
+FEEDBACK: [Your feedback]
+SCORE: [Numerical score]
+CLUE_GIVEN: [true/false]
+SHOW_EXPECTED: [true if score is 100]`;
     
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -247,44 +271,30 @@ export async function generateSecondAttemptFeedback(
       };
     }
 
-    const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
-    const additionalFindings = Array.isArray(request.additionalFindings) ? request.additionalFindings : [];
-    const pointsPerFinding = Math.floor(100 / expectedFindings.length);
-
     const prompt = `
-Evaluate this trainee's second attempt using the Socratic method and exact matching.
+You are a radiology expert grading a trainee's second attempt. Follow these scoring rules strictly:
 
-Case Information:
-Title: ${request.caseTitle}
-Accession Number: ${request.accessionNumber}
-Clinical Information: ${request.clinicalInfo}
-Summary of Pathology: ${request.summaryOfPathology}
-Number of Images: ${request.images?.length || 0}
-
-Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding/2} points each for second attempt):
-${expectedFindings.map(finding => `- ${finding}`).join('\n')}
-
-Additional Findings (For context):
-${additionalFindings.map(finding => `- ${finding}`).join('\n')}
+1. Each case has one or multiple diagnoses (findings)
+2. Total points are 100, divided by the number of findings
+3. Half points for correct detection after receiving a clue
+4. No points for findings still not identified
 
 First attempt:
 "${firstAttempt}"
 
-Second attempt after clues:
+Second attempt:
 "${secondAttempt}"
 
-Instructions:
-1. Compare both attempts with expected findings
-2. For each finding:
-   - Award ${pointsPerFinding} points for first attempt matches
-   - Award ${pointsPerFinding/2} points for second attempt matches
-   - Provide educational feedback using Socratic method
-3. Reveal all expected findings after second attempt
-4. Explain any remaining mismatches
+Expected Findings:
+${request.expectedFindings.join('\n')}
 
-Format response as:
-FEEDBACK: [Your Socratic feedback]
-SCORE: [Total points]
+Calculate the score based on:
+- Number of findings: ${request.expectedFindings.length}
+- Points per finding on second attempt: ${Math.floor(50 / request.expectedFindings.length)}
+
+Format your response as:
+FEEDBACK: [Your feedback]
+SCORE: [Total score including first and second attempts]
 SHOW_EXPECTED: true`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {

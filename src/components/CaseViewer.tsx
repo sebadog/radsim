@@ -15,7 +15,6 @@ function CaseViewer() {
   const [currentCaseIndex, setCurrentCaseIndex] = useState(0);
   const [allCases, setAllCases] = useState(defaultCases);
   
-  // State for attempts
   const [firstAttempt, setFirstAttempt] = useState('');
   const [firstAttemptFeedback, setFirstAttemptFeedback] = useState<string | null>(null);
   const [firstAttemptScore, setFirstAttemptScore] = useState<number | null>(null);
@@ -30,6 +29,7 @@ function CaseViewer() {
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
   const [completionUpdating, setCompletionUpdating] = useState(false);
+  const [totalScore, setTotalScore] = useState<number>(0);
 
   const openRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
 
@@ -37,7 +37,6 @@ function CaseViewer() {
     const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
     setApiKeyMissing(!apiKey);
     
-    // Reset state when case changes
     setFirstAttempt('');
     setFirstAttemptFeedback(null);
     setFirstAttemptScore(null);
@@ -96,24 +95,19 @@ function CaseViewer() {
       if (currentAttemptNumber === 1) {
         const result = await generateFeedback({
           userImpression: currentAttemptText,
-          expectedFindings: currentCase?.expectedFindings || [],
+          expectedFindings: currentCase?.expected_findings || [],
           caseTitle: currentCase?.title || '',
           clinicalInfo: currentCase?.clinical_info || '',
           summaryOfPathology: currentCase?.summary_of_pathology || '',
-          accessionNumber: currentCase?.accession_number || '',
-          additionalFindings: currentCase?.additional_findings || [],
-          images: currentCase?.images || [],
-          completed: currentCase?.completed || false,
-          createdAt: currentCase?.created_at,
-          updatedAt: currentCase?.updated_at
+          diagnosis: currentCase?.diagnosis || ''
         });
         
         setFirstAttemptFeedback(result.feedback);
         setFirstAttemptScore(result.score);
         
-        // If score is 100, show everything and skip second attempt
         if (result.score === 100) {
-          setScore(result.score);
+          setScore(100);
+          setTotalScore(100);
           setShowExpectedImpression(true);
           setShowTeachingPoints(true);
         } else {
@@ -125,21 +119,17 @@ function CaseViewer() {
           currentAttemptText,
           {
             userImpression: currentAttemptText,
-            expectedFindings: currentCase?.expectedFindings || [],
+            expectedFindings: currentCase?.expected_findings || [],
             caseTitle: currentCase?.title || '',
             clinicalInfo: currentCase?.clinical_info || '',
             summaryOfPathology: currentCase?.summary_of_pathology || '',
-            accessionNumber: currentCase?.accession_number || '',
-            additionalFindings: currentCase?.additional_findings || [],
-            images: currentCase?.images || [],
-            completed: currentCase?.completed || false,
-            createdAt: currentCase?.created_at,
-            updatedAt: currentCase?.updated_at
+            diagnosis: currentCase?.diagnosis || ''
           }
         );
         
         setFeedback(result.feedback);
         setScore(result.score);
+        setTotalScore(result.score);
         setShowExpectedImpression(true);
         setShowTeachingPoints(true);
       }
@@ -293,7 +283,6 @@ function CaseViewer() {
         </div>
       </div>
 
-      {/* Case Links */}
       <div className="mb-6 flex space-x-4">
         {currentCase.images && currentCase.images.length > 0 && (
           <a 
@@ -334,7 +323,26 @@ function CaseViewer() {
       </div>
 
       <div className="w-full max-w-2xl mx-auto">
-        {/* First Attempt (if completed) */}
+        {(firstAttemptScore !== null || totalScore > 0) && (
+          <div className="mb-6 p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+            <div className="flex items-center">
+              <Award className="text-blue-500 mr-2" size={24} />
+              <div>
+                <h3 className="font-medium text-blue-800">Your Score</h3>
+                <p className="text-blue-600">
+                  {firstAttemptScore === 100 ? (
+                    'Perfect score! 100/100'
+                  ) : totalScore > 0 ? (
+                    `Final score: ${totalScore}/100`
+                  ) : (
+                    `First attempt: ${firstAttemptScore}/100 - Try again for remaining points!`
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {firstAttemptFeedback && (
           <div className="mb-6">
             <h3 className="font-medium text-gray-700 mb-2">First Attempt:</h3>
@@ -350,7 +358,6 @@ function CaseViewer() {
           </div>
         )}
 
-        {/* Current Attempt Input */}
         {!gaveUp && currentAttemptNumber <= 2 && (
           <div className="mb-6">
             <h3 className="font-medium text-gray-700 mb-2">
@@ -384,7 +391,6 @@ function CaseViewer() {
           </div>
         )}
 
-        {/* Final Feedback */}
         {feedback && (
           <div className="mb-6">
             <h3 className="font-medium text-gray-700 mb-2">Final Feedback:</h3>
@@ -397,7 +403,6 @@ function CaseViewer() {
           </div>
         )}
 
-        {/* Expected Findings */}
         {showExpectedImpression && currentCase.expected_findings && (
           <div className="mb-6">
             <h3 className="font-medium text-gray-700 mb-2">Expected Findings:</h3>
@@ -411,7 +416,6 @@ function CaseViewer() {
           </div>
         )}
 
-        {/* Teaching Points */}
         {showTeachingPoints && (
           <div className="mb-6">
             <h3 className="font-medium text-gray-700 mb-2">Teaching Points:</h3>
@@ -422,7 +426,6 @@ function CaseViewer() {
           </div>
         )}
 
-        {/* Action Buttons */}
         <div className="flex flex-wrap gap-3">
           {!gaveUp && currentAttemptNumber <= 2 && !showTeachingPoints && (
             <button
