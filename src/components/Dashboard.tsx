@@ -11,10 +11,6 @@ function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const [password, setPassword] = useState('');
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [actionAfterAuth, setActionAfterAuth] = useState<{type: 'edit' | 'delete', id: string} | null>(null);
   
   const navigate = useNavigate();
   const { user } = useAuth();
