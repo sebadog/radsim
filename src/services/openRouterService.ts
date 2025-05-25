@@ -374,24 +374,16 @@ SHOW_EXPECTED: [false - only true if trainee got everything correct]
     
     // If the LLM didn't follow the format, make a best guess
     if (score === null) {
-        currentCase?.clinicalInfo || currentCase?.clinical_info || '',
-        currentCase?.summaryOfPathology || currentCase?.summary_of_pathology || ''
-      );
-      
-      // Check for partial matches
-      const partialMatches = safeExpectedFindings.filter(finding => {
+      const allFound = safeExpectedFindings.every(finding => {
         const keyTerms = finding.toLowerCase().split(/\s+/).filter(term => term.length > 3);
-        clinicalInfo: currentCase?.clinicalInfo || currentCase?.clinical_info || '',
-        summaryOfPathology: currentCase?.summaryOfPathology || currentCase?.summary_of_pathology || ''
+        const impression = safeResponseToClue.toLowerCase();
+        return keyTerms.some(term => impression.includes(term));
       });
       
-      const hasPartialMatches = partialMatches.length > 0;
-        
       if (allFound) {
         score = 50;
         showExpectedImpression = true;
       } else {
-        // Provide progressive feedback based on partial matches
         score = null;
         clueGiven = true;
         showExpectedImpression = false;
