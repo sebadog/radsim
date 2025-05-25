@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
 import { fetchCases, deleteCase, markCaseAsCompleted } from '../services/caseService';
 import { Case } from '../types/case';
 
@@ -40,26 +40,23 @@ function Dashboard() {
       return;
     }
 
-    // Require password for deletion
     setActionAfterAuth({type: 'delete', id});
     setShowPasswordModal(true);
   };
 
   const handleEditCase = (id: string) => {
-    // Require password for editing
     setActionAfterAuth({type: 'edit', id});
     setShowPasswordModal(true);
   };
 
   const handleAddNewCase = () => {
-    // Require password for adding new case
     setActionAfterAuth({type: 'edit', id: 'new'});
     setShowPasswordModal(true);
   };
 
   const handleToggleCompleted = async (e: React.MouseEvent, id: string, currentStatus: boolean) => {
-    e.preventDefault(); // Prevent navigation to case detail
-    e.stopPropagation(); // Prevent event bubbling
+    e.preventDefault();
+    e.stopPropagation();
     
     try {
       await markCaseAsCompleted(id, !currentStatus);
@@ -76,7 +73,6 @@ function Dashboard() {
       setShowPasswordModal(false);
       setPasswordError(null);
       
-      // Perform the action that required authentication
       if (actionAfterAuth) {
         if (actionAfterAuth.type === 'delete') {
           performDelete(actionAfterAuth.id);
@@ -89,7 +85,6 @@ function Dashboard() {
         }
       }
       
-      // Reset
       setPassword('');
       setActionAfterAuth(null);
     } else {
@@ -116,7 +111,6 @@ function Dashboard() {
 
   return (
     <div className="p-6 mb-6 w-full">
-      {/* Password Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -247,7 +241,6 @@ function Dashboard() {
                 caseItem.completed ? 'border-green-300' : 'border-gray-200'
               }`}
             >
-              {/* Card header with completion status */}
               <div className={`p-4 flex justify-between items-center ${caseItem.completed ? 'bg-green-100' : 'bg-white'}`}>
                 <h3 className="font-semibold text-lg text-gray-800">
                   {caseItem.case_number ? `Case ${caseItem.case_number}: ` : ''}{caseItem.title}
@@ -265,13 +258,11 @@ function Dashboard() {
                 </button>
               </div>
               
-              {/* Card body */}
               <div className="p-4 bg-white">
                 <div className="mb-3 text-sm text-gray-700 line-clamp-2 h-10">
                   {caseItem.clinical_info}
                 </div>
                 
-                {/* Case metadata */}
                 <div className="space-y-2 mb-4">
                   {caseItem.diagnosis && (
                     <div className="flex items-center text-xs text-gray-600">
@@ -287,25 +278,8 @@ function Dashboard() {
                     <User size={14} className="mr-1" />
                     <span>{Array.isArray(caseItem.expected_findings) ? caseItem.expected_findings.length : 0} findings</span>
                   </div>
-                  {caseItem.images && caseItem.images.length > 0 && (
-                    <div className="flex items-center text-xs text-blue-600 hover:text-blue-800">
-                      <FileImage size={14} className="mr-1" />
-                      <a href={caseItem.images[0]} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                        View Image <ExternalLink size={12} className="ml-1" />
-                      </a>
-                    </div>
-                  )}
-                  {caseItem.survey_url && (
-                    <div className="flex items-center text-xs text-blue-600 hover:text-blue-800">
-                      <FormInput size={14} className="mr-1" />
-                      <a href={caseItem.survey_url} target="_blank" rel="noopener noreferrer" className="flex items-center">
-                        Take Survey <ExternalLink size={12} className="ml-1" />
-                      </a>
-                    </div>
-                  )}
                 </div>
                 
-                {/* Action buttons */}
                 <div className="flex justify-between items-center mt-2">
                   <Link 
                     to={`/case/${caseItem.id}`} 
@@ -337,7 +311,6 @@ function Dashboard() {
                 </div>
               </div>
               
-              {/* Completion status indicator */}
               {caseItem.completed && (
                 <div className="py-2 px-4 bg-green-100 text-green-800 text-sm font-medium flex items-center justify-center">
                   <CheckCircle size={16} className="mr-1.5" /> Completed
