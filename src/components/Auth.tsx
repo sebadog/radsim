@@ -11,9 +11,26 @@ export function Auth() {
   
   const { setUser } = useAuth();
 
+  const validatePassword = (password: string): string | null => {
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters long';
+    }
+    return null;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate password before submission
+    if (isSignUp) {
+      const passwordError = validatePassword(password);
+      if (passwordError) {
+        setError(passwordError);
+        return;
+      }
+    }
+
     setLoading(true);
 
     try {
@@ -23,7 +40,12 @@ export function Auth() {
       
       setUser(user);
     } catch (err: any) {
-      setError(err.message);
+      // Handle specific error cases
+      if (err.message.includes('already registered')) {
+        setError('This email is already registered. Please sign in instead.');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -80,6 +102,12 @@ export function Auth() {
             </div>
           </div>
 
+          {isSignUp && (
+            <div className="text-sm text-gray-600">
+              Password must be at least 6 characters long
+            </div>
+          )}
+
           <div>
             <button
               type="submit"
@@ -103,7 +131,10 @@ export function Auth() {
           <div className="text-center">
             <button
               type="button"
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setError(null);
+              }}
               className="text-sm text-blue-600 hover:text-blue-500"
             >
               {isSignUp
