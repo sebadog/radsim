@@ -53,7 +53,7 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     .insert({
     title: caseData.title,
     accession_number: Math.random().toString(36).substring(2, 12).toUpperCase(),
-    clinicalInfo: caseData.clinicalInfo,
+    clinical_info: caseData.clinicalInfo,
     expectedFindings: caseData.expectedFindings,
     additionalFindings: caseData.additionalFindings,
     summaryOfPathology: caseData.summaryOfPathology,
@@ -78,7 +78,7 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
     .from('cases')
     .update({
     title: caseData.title,
-    clinicalInfo: caseData.clinicalInfo,
+    clinical_info: caseData.clinicalInfo,
     expectedFindings: caseData.expectedFindings,
     additionalFindings: caseData.additionalFindings,
     summaryOfPathology: caseData.summaryOfPathology,
