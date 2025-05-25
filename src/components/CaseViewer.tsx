@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
 import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
 import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
@@ -177,6 +177,7 @@ function CaseViewer() {
   const resetCase = () => {
     setFirstAttempt('');
     setFirstAttemptFeedback(null);
+    setFirstAttemptScore(null);
     setSecondAttempt('');
     setCurrentAttemptNumber(1);
     setFeedback(null);
@@ -235,9 +236,18 @@ function CaseViewer() {
           >
             <ArrowLeft size={20} />
           </button>
-          <h2 className="text-xl font-semibold">Case: {currentCase?.title}</h2>
+          <div>
+            <h2 className="text-xl font-semibold">
+              {currentCase.case_number ? `Case ${currentCase.case_number}: ` : ''}{currentCase.title}
+            </h2>
+            {currentCase.diagnosis && (
+              <p className="text-sm text-gray-600 mt-1">
+                Diagnosis: {currentCase.diagnosis}
+              </p>
+            )}
+          </div>
           
-          {currentCase?.completed && (
+          {currentCase.completed && (
             <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
               <CheckCircle size={12} className="mr-1" /> Completed
             </span>
@@ -251,19 +261,19 @@ function CaseViewer() {
             className={`px-3 py-1.5 rounded-md flex items-center ${
               completionUpdating 
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : currentCase?.completed 
+                : currentCase.completed 
                   ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
             }`}
           >
             {completionUpdating ? (
               <Loader2 size={16} className="mr-1.5 animate-spin" />
-            ) : currentCase?.completed ? (
+            ) : currentCase.completed ? (
               <Circle size={16} className="mr-1.5" />
             ) : (
               <CheckCircle size={16} className="mr-1.5" />
             )}
-            {currentCase?.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
+            {currentCase.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
           </button>
           
           <button 
@@ -283,6 +293,34 @@ function CaseViewer() {
         </div>
       </div>
 
+      {/* Case Links */}
+      <div className="mb-6 flex space-x-4">
+        {currentCase.images && currentCase.images.length > 0 && (
+          <a 
+            href={currentCase.images[0]} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+          >
+            <FileImage size={18} className="mr-2" />
+            View Image
+            <ExternalLink size={14} className="ml-1" />
+          </a>
+        )}
+        {currentCase.survey_url && (
+          <a 
+            href={currentCase.survey_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+          >
+            <FormInput size={18} className="mr-2" />
+            Take Survey
+            <ExternalLink size={14} className="ml-1" />
+          </a>
+        )}
+      </div>
+
       {apiKeyMissing && (
         <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 text-yellow-700">
           <p className="font-medium">OpenRouter API Key Missing</p>
@@ -292,7 +330,7 @@ function CaseViewer() {
 
       <div className="mb-6">
         <h3 className="font-medium text-gray-700 mb-2">Clinical Information:</h3>
-        <p className="bg-gray-50 p-3 rounded">{currentCase?.clinicalInfo || currentCase?.clinical_info}</p>
+        <p className="bg-gray-50 p-3 rounded">{currentCase.clinical_info}</p>
       </div>
 
       <div className="w-full max-w-2xl mx-auto">
@@ -360,12 +398,12 @@ function CaseViewer() {
         )}
 
         {/* Expected Findings */}
-        {showExpectedImpression && currentCase?.expectedFindings && (
+        {showExpectedImpression && currentCase.expected_findings && (
           <div className="mb-6">
             <h3 className="font-medium text-gray-700 mb-2">Expected Findings:</h3>
             <div className="bg-gray-50 p-3 rounded">
               <ul className="list-disc pl-5 space-y-1">
-                {currentCase.expectedFindings.map((finding: string, index: number) => (
+                {currentCase.expected_findings.map((finding: string, index: number) => (
                   <li key={index}>{finding}</li>
                 ))}
               </ul>
@@ -379,7 +417,7 @@ function CaseViewer() {
             <h3 className="font-medium text-gray-700 mb-2">Teaching Points:</h3>
             <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
               <h4 className="font-medium mb-2">Summary of Pathology:</h4>
-              <p>{currentCase?.summaryOfPathology || currentCase?.summary_of_pathology}</p>
+              <p>{currentCase.summary_of_pathology}</p>
             </div>
           </div>
         )}
@@ -409,7 +447,7 @@ function CaseViewer() {
             className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 flex items-center ${
               completionUpdating 
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : currentCase?.completed 
+                : currentCase.completed 
                   ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500' 
                   : 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
             }`}
@@ -419,7 +457,7 @@ function CaseViewer() {
                 <Loader2 className="animate-spin mr-2" size={18} />
                 Updating...
               </>
-            ) : currentCase?.completed ? (
+            ) : currentCase.completed ? (
               <>
                 <Circle className="mr-2" size={18} />
                 Mark as Incomplete
