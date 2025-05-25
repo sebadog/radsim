@@ -45,7 +45,7 @@ export async function fetchCaseById(id: string): Promise<Case | null> {
   return data;
 }
 
-export async function createCase(caseData: CaseFormData): Promise<string> {
+export async function createCase(caseData: CaseFormData): Promise<Case> {
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
@@ -60,33 +60,31 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     ? [caseData.imageUrl]
     : ['https://medlineplus.gov/images/Xray_share.jpg'];
 
-  const newCase = {
-    title,
-    accession_number: accessionNumber,
-    clinical_info: clinicalInfo,
-    expected_findings: expectedFindings,
-    additional_findings: additionalFindings,
-    summary_of_pathology: summaryOfPathology,
-    images: imageUrls,
-    survey_url: caseData.surveyUrl,
-    completed: false
-  };
-
   const { data, error } = await supabase
     .from('cases')
-    .insert([newCase])
+    .insert([{
+      title,
+      accession_number: accessionNumber,
+      clinical_info: clinicalInfo,
+      expected_findings: expectedFindings,
+      additional_findings: additionalFindings,
+      summary_of_pathology: summaryOfPathology,
+      images: imageUrls,
+      survey_url: caseData.surveyUrl,
+      completed: false
+    }])
     .select()
     .single();
 
   if (error) {
-    console.error('Error creating case:', error.message);
-    throw new Error(`Failed to create case: ${error.message}`);
+    console.error('Error creating case:', error);
+    throw new Error('Failed to create case');
   }
 
-  return data.id;
+  return data;
 }
 
-export async function updateCase(id: string, caseData: CaseFormData): Promise<string> {
+export async function updateCase(id: string, caseData: CaseFormData): Promise<Case> {
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
@@ -96,7 +94,7 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
   const imageUrls = caseData.imageUrl 
     ? [caseData.imageUrl]
     : ['https://medlineplus.gov/images/Xray_share.jpg'];
-  
+
   const { data, error } = await supabase
     .from('cases')
     .update({
@@ -112,16 +110,16 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
     .eq('id', id)
     .select()
     .single();
-  
+
   if (error) {
     console.error('Error updating case:', error);
     throw new Error('Failed to update case');
   }
-  
-  return id;
+
+  return data;
 }
 
-export async function deleteCase(id: string): Promise<boolean> {
+export async function deleteCase(id: string): Promise<void> {
   const { error } = await supabase
     .from('cases')
     .delete()
@@ -131,11 +129,9 @@ export async function deleteCase(id: string): Promise<boolean> {
     console.error('Error deleting case:', error);
     throw new Error('Failed to delete case');
   }
-
-  return true;
 }
 
-export async function markCaseAsCompleted(id: string, completed: boolean): Promise<boolean> {
+export async function markCaseAsCompleted(id: string, completed: boolean): Promise<void> {
   const { error } = await supabase
     .from('cases')
     .update({ 
@@ -148,6 +144,4 @@ export async function markCaseAsCompleted(id: string, completed: boolean): Promi
     console.error('Error updating case completion:', error);
     throw new Error('Failed to update case completion status');
   }
-
-  return true;
 }
