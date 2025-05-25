@@ -53,7 +53,7 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
         messages: [
           {
             role: 'system',
-            content: 'You are a radiology expert providing feedback on trainee impressions. Evaluate their responses based on the following criteria:\n\n- Each case has one or multiple diagnoses, each treated independently\n- Total points (100) are divided by the number of diagnoses\n- Full points for correct detection AND interpretation on first attempt\n- Half points if diagnosis identified correctly after receiving a clue\n- No points for diagnoses not identified even after clues'
+            content: 'You are a radiology expert providing feedback on trainee impressions. Compare their response exactly with the expected findings. A finding is only considered correct if it matches the expected finding precisely. Evaluate based on these criteria:\n\n- Each case has one or multiple expected findings that must match exactly\n- Total points (100) are divided by the number of expected findings\n- Full points only for exact matches on first attempt\n- Half points if exact match achieved after receiving a clue\n- No points for findings that don\'t match exactly even after clues'
           },
           {
             role: 'user',
@@ -102,42 +102,43 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
 
 function createPrompt(request: FeedbackRequest): string {
   const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
-  const pointsPerDiagnosis = Math.floor(100 / expectedFindings.length);
+  const pointsPerFinding = Math.floor(100 / expectedFindings.length);
 
   return `
-Evaluate this radiology trainee's response. This is their first attempt.
+Evaluate this radiology trainee's response by comparing it exactly with the expected findings.
 
 Case Information:
 Title: ${request.caseTitle}
 Clinical Information: ${request.clinicalInfo}
 
-Expected Findings (${expectedFindings.length} diagnoses, ${pointsPerDiagnosis} points each):
+Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
 
 Trainee's impression:
 "${request.userImpression}"
 
 Evaluation Instructions:
-1. For each diagnosis:
-   - Award ${pointsPerDiagnosis} points for correct detection AND interpretation
-   - Provide specific feedback on what was identified correctly or missed
-   - For missed findings, give a helpful clue without revealing the diagnosis
+1. For each expected finding:
+   - Compare the trainee's response EXACTLY with the expected finding
+   - Award ${pointsPerFinding} points ONLY for exact matches
+   - For non-exact matches, provide a clue that helps identify the specific finding
+   - Do not accept similar or partial matches
 
 2. Calculate total score:
-   - Sum points for all correctly identified diagnoses
-   - Do not award partial points on first attempt
-   - Mark findings that need clues for second attempt
+   - Sum points only for exact matches
+   - No partial points for similar findings
+   - Mark non-matching findings for second attempt
 
 3. Feedback format:
-   - Acknowledge correct findings
-   - For missed findings, provide specific clues
-   - Be educational but don't reveal answers
+   - For exact matches: Confirm the correct finding
+   - For non-matches: Provide specific clues about what to look for
+   - Be educational but don't reveal unmatched findings
 
 Format your response as:
 FEEDBACK: [Your detailed feedback]
-SCORE: [Total points earned]
-CLUE_GIVEN: [true if any clues provided]
-SHOW_EXPECTED: [true only if all diagnoses correct]
+SCORE: [Total points for exact matches]
+CLUE_GIVEN: [true if any findings didn't match exactly]
+SHOW_EXPECTED: [true only if all findings match exactly]
 `;
 }
 
@@ -168,16 +169,17 @@ function parseLLMResponse(response: string, request: FeedbackRequest): FeedbackR
     showExpectedImpression = showExpectedMatch[1].toLowerCase() === 'true';
   }
   
-  // Calculate score based on matched findings
+  // Calculate score based on exact matches
   const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
-  const pointsPerDiagnosis = Math.floor(100 / expectedFindings.length);
+  const pointsPerFinding = Math.floor(100 / expectedFindings.length);
   
   let calculatedScore = 0;
+  const userImpression = request.userImpression.toLowerCase().trim();
+  
   expectedFindings.forEach(finding => {
-    const keyTerms = finding.toLowerCase().split(/\s+/).filter(term => term.length > 3);
-    const impression = request.userImpression.toLowerCase();
-    if (keyTerms.every(term => impression.includes(term))) {
-      calculatedScore += pointsPerDiagnosis;
+    const expectedLower = finding.toLowerCase().trim();
+    if (userImpression.includes(expectedLower)) {
+      calculatedScore += pointsPerFinding;
     }
   });
   
@@ -186,7 +188,7 @@ function parseLLMResponse(response: string, request: FeedbackRequest): FeedbackR
     score = calculatedScore;
   }
   
-  // Show expected impression only if all diagnoses were correct
+  // Show expected impression only if all findings matched exactly
   showExpectedImpression = score === 100;
   
   return {
@@ -215,16 +217,16 @@ export async function generateSecondAttemptFeedback(
     }
 
     const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
-    const pointsPerDiagnosis = Math.floor(100 / expectedFindings.length);
+    const pointsPerFinding = Math.floor(100 / expectedFindings.length);
 
     const prompt = `
-Evaluate this radiology trainee's second attempt after receiving clues.
+Evaluate this radiology trainee's second attempt by comparing it exactly with the expected findings.
 
 Case Information:
 Title: ${request.caseTitle}
 Clinical Information: ${request.clinicalInfo}
 
-Expected Findings (${expectedFindings.length} diagnoses, ${pointsPerDiagnosis} points each):
+Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
 
 First attempt:
@@ -234,23 +236,25 @@ Second attempt after receiving clues:
 "${secondAttempt}"
 
 Evaluation Instructions:
-1. For each diagnosis:
-   - Award ${pointsPerDiagnosis} points if correctly identified in first attempt
-   - Award ${pointsPerDiagnosis/2} points if correctly identified in second attempt
-   - No points if still not identified
+1. For each expected finding:
+   - Compare EXACTLY with both attempts
+   - Award ${pointsPerFinding} points for exact matches in first attempt
+   - Award ${pointsPerFinding/2} points for exact matches in second attempt
+   - No points for non-exact matches
 
 2. Calculate total score:
    - Sum points from both attempts
+   - Only count exact matches
    - Show all expected findings after second attempt
 
 3. Feedback format:
-   - Acknowledge improvements from first attempt
-   - Explain any remaining misses
+   - Identify which findings matched exactly in each attempt
+   - Explain any remaining non-matches
    - Be educational and supportive
 
 Format your response as:
 FEEDBACK: [Your detailed feedback]
-SCORE: [Total points earned]
+SCORE: [Total points for exact matches]
 SHOW_EXPECTED: true
 `;
 
@@ -267,7 +271,7 @@ SHOW_EXPECTED: true
         messages: [
           {
             role: 'system',
-            content: 'You are a radiology expert evaluating a trainee\'s second attempt after receiving clues. Award half points for correct diagnoses identified after clues.'
+            content: 'You are a radiology expert evaluating a trainee\'s second attempt. Only award points for exact matches with the expected findings.'
           },
           {
             role: 'user',
@@ -300,16 +304,16 @@ SHOW_EXPECTED: true
     if (scoreMatch) {
       score = parseInt(scoreMatch[1], 10);
     } else {
-      // Calculate score if not provided by LLM
+      // Calculate score based on exact matches in both attempts
+      const firstAttemptLower = firstAttempt.toLowerCase().trim();
+      const secondAttemptLower = secondAttempt.toLowerCase().trim();
+      
       expectedFindings.forEach(finding => {
-        const keyTerms = finding.toLowerCase().split(/\s+/).filter(term => term.length > 3);
-        const firstAttemptMatch = keyTerms.every(term => firstAttempt.toLowerCase().includes(term));
-        const secondAttemptMatch = keyTerms.every(term => secondAttempt.toLowerCase().includes(term));
-        
-        if (firstAttemptMatch) {
-          score += pointsPerDiagnosis;
-        } else if (secondAttemptMatch) {
-          score += Math.floor(pointsPerDiagnosis / 2);
+        const expectedLower = finding.toLowerCase().trim();
+        if (firstAttemptLower.includes(expectedLower)) {
+          score += pointsPerFinding;
+        } else if (secondAttemptLower.includes(expectedLower)) {
+          score += Math.floor(pointsPerFinding / 2);
         }
       });
     }
