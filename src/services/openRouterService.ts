@@ -59,7 +59,32 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
         messages: [
           {
             role: 'system',
-            content: 'You are a radiology expert providing feedback on trainee impressions. Compare their response exactly with the expected findings. A finding is only considered correct if it matches the expected finding precisely. Evaluate based on these criteria:\n\n- Each case has one or multiple expected findings that must match exactly\n- Total points (100) are divided by the number of expected findings\n- Full points only for exact matches on first attempt\n- Half points if exact match achieved after receiving a clue\n- No points for findings that don\'t match exactly even after clues'
+            content: `You are a radiology expert providing feedback using the Socratic method. Follow these instructions strictly:
+
+1. For correct findings:
+   - Congratulate by paraphrasing their correct findings
+   - Award full points for exact matches
+
+2. For missed findings:
+   - Ask them to review specific areas without revealing the finding
+   - Provide ONE clue per finding
+   - Never use words from the diagnosis in clues
+   - Do not reveal diagnoses in clues
+
+3. For misinterpreted findings:
+   - Encourage considering other etiologies
+   - Example: "Consider other possible etiologies for (finding)"
+   - Do not disclose the correct diagnosis
+
+4. For extra findings:
+   - If they describe findings not in Expected/Additional lists
+   - Inform: "The abnormality you described was not included among the findings for this case. If you consider it relevant, please submit it in the feedback section."
+
+5. Scoring:
+   - Total points (100) divided by number of findings
+   - Full points for exact matches on first attempt
+   - Half points if matched after clue
+   - No points if not matched after clue`
           },
           {
             role: 'user',
@@ -112,7 +137,7 @@ function createPrompt(request: FeedbackRequest): string {
   const pointsPerFinding = Math.floor(100 / expectedFindings.length);
 
   return `
-Evaluate this radiology trainee's response by comparing it exactly with the expected findings.
+Evaluate this trainee's response using the Socratic method and exact matching with expected findings.
 
 Case Information:
 Title: ${request.caseTitle}
@@ -120,42 +145,32 @@ Accession Number: ${request.accessionNumber}
 Clinical Information: ${request.clinicalInfo}
 Summary of Pathology: ${request.summaryOfPathology}
 Number of Images: ${request.images?.length || 0}
-Additional Findings Present: ${additionalFindings.length > 0 ? 'Yes' : 'No'}
 
 Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
 
-Additional Findings (For context, not required for scoring):
+Additional Findings (For context):
 ${additionalFindings.map(finding => `- ${finding}`).join('\n')}
 
 Trainee's impression:
 "${request.userImpression}"
 
-Evaluation Instructions:
-1. For each expected finding:
-   - Compare the trainee's response EXACTLY with the expected finding
-   - Award ${pointsPerFinding} points ONLY for exact matches
-   - For non-exact matches, provide a clue that helps identify the specific finding
-   - Do not accept similar or partial matches
-   - Consider the clinical context and pathology summary when providing feedback
+Instructions:
+1. Compare each finding EXACTLY with expected findings
+2. For each finding:
+   - If exact match: Congratulate and award ${pointsPerFinding} points
+   - If missed: Ask Socratic questions about the relevant area
+   - If misinterpreted: Guide to consider other etiologies
+   - If extra finding: Note it's not in expected/additional lists
+3. Provide ONE clue per missed finding
+4. Never reveal diagnoses in clues or feedback
+5. Use Socratic method to guide learning
 
-2. Calculate total score:
-   - Sum points only for exact matches
-   - No partial points for similar findings
-   - Mark non-matching findings for second attempt
-
-3. Feedback format:
-   - For exact matches: Confirm the correct finding
-   - For non-matches: Provide specific clues about what to look for
-   - Be educational but don't reveal unmatched findings
-   - Reference the clinical information and pathology when relevant
-
-Format your response as:
-FEEDBACK: [Your detailed feedback]
-SCORE: [Total points for exact matches]
-CLUE_GIVEN: [true if any findings didn't match exactly]
-SHOW_EXPECTED: [true only if all findings match exactly]
-`;
+Format response as:
+FEEDBACK: [Your Socratic feedback]
+SCORE: [Points for exact matches]
+CLUE_GIVEN: [true if any clues provided]
+SHOW_EXPECTED: [true only if all exactly matched]`;
 }
 
 function parseLLMResponse(response: string, request: FeedbackRequest): FeedbackResponse {
@@ -237,7 +252,7 @@ export async function generateSecondAttemptFeedback(
     const pointsPerFinding = Math.floor(100 / expectedFindings.length);
 
     const prompt = `
-Evaluate this radiology trainee's second attempt by comparing it exactly with the expected findings.
+Evaluate this trainee's second attempt using the Socratic method and exact matching.
 
 Case Information:
 Title: ${request.caseTitle}
@@ -245,44 +260,32 @@ Accession Number: ${request.accessionNumber}
 Clinical Information: ${request.clinicalInfo}
 Summary of Pathology: ${request.summaryOfPathology}
 Number of Images: ${request.images?.length || 0}
-Additional Findings Present: ${additionalFindings.length > 0 ? 'Yes' : 'No'}
 
-Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
+Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding/2} points each for second attempt):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
 
-Additional Findings (For context, not required for scoring):
+Additional Findings (For context):
 ${additionalFindings.map(finding => `- ${finding}`).join('\n')}
 
 First attempt:
 "${firstAttempt}"
 
-Second attempt after receiving clues:
+Second attempt after clues:
 "${secondAttempt}"
 
-Evaluation Instructions:
-1. For each expected finding:
-   - Compare EXACTLY with both attempts
-   - Award ${pointsPerFinding} points for exact matches in first attempt
-   - Award ${pointsPerFinding/2} points for exact matches in second attempt
-   - No points for non-exact matches
-   - Consider the clinical context and pathology summary
+Instructions:
+1. Compare both attempts with expected findings
+2. For each finding:
+   - Award ${pointsPerFinding} points for first attempt matches
+   - Award ${pointsPerFinding/2} points for second attempt matches
+   - Provide educational feedback using Socratic method
+3. Reveal all expected findings after second attempt
+4. Explain any remaining mismatches
 
-2. Calculate total score:
-   - Sum points from both attempts
-   - Only count exact matches
-   - Show all expected findings after second attempt
-
-3. Feedback format:
-   - Identify which findings matched exactly in each attempt
-   - Explain any remaining non-matches
-   - Reference the clinical information and pathology when relevant
-   - Be educational and supportive
-
-Format your response as:
-FEEDBACK: [Your detailed feedback]
-SCORE: [Total points for exact matches]
-SHOW_EXPECTED: true
-`;
+Format response as:
+FEEDBACK: [Your Socratic feedback]
+SCORE: [Total points]
+SHOW_EXPECTED: true`;
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -297,7 +300,7 @@ SHOW_EXPECTED: true
         messages: [
           {
             role: 'system',
-            content: 'You are a radiology expert evaluating a trainee\'s second attempt. Only award points for exact matches with the expected findings.'
+            content: 'You are a radiology expert evaluating a trainee\'s second attempt using the Socratic method. Award points based on exact matches with expected findings.'
           },
           {
             role: 'user',
