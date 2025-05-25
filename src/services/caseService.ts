@@ -1,8 +1,10 @@
-import { v4 as uuidv4 } from 'uuid';
-import { Case, cases } from '../data/cases';
+import { createClient } from '@supabase/supabase-js';
+import { Case } from '../types/case';
 
-// In-memory storage for new cases
-let localCases = [...cases];
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
 
 export interface CaseFormData {
   title: string;
@@ -14,108 +16,114 @@ export interface CaseFormData {
 }
 
 export async function fetchCases(): Promise<Case[]> {
-  return localCases;
+  const { data, error } = await supabase
+    .from('cases')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching cases:', error);
+    throw new Error('Failed to fetch cases');
+  }
+
+  return data || [];
 }
 
 export async function fetchCaseById(id: string): Promise<Case | null> {
-  const foundCase = localCases.find(c => c.id === id);
-  return foundCase || null;
+  const { data, error } = await supabase
+    .from('cases')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    console.error('Error fetching case:', error);
+    throw new Error('Failed to fetch case');
+  }
+
+  return data;
 }
 
 export async function createCase(caseData: CaseFormData): Promise<string> {
-  // Generate a new case ID
-  const newId = `case${localCases.length + 1}`;
-  
   // Create image URLs from files (in a real app, these would be uploaded to storage)
   const imageUrls = caseData.images.map(file => URL.createObjectURL(file));
   
-  // Create the new case
-  const newCase: Case = {
-    id: newId,
+  const { data, error } = await supabase
+    .from('cases')
+    .insert({
     title: caseData.title,
-    accessionNumber: uuidv4().substring(0, 10),
+    accession_number: Math.random().toString(36).substring(2, 12).toUpperCase(),
     clinicalInfo: caseData.clinicalInfo,
     expectedFindings: caseData.expectedFindings,
     additionalFindings: caseData.additionalFindings,
     summaryOfPathology: caseData.summaryOfPathology,
-    images: imageUrls,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    completed: false
-  };
+    images: imageUrls
+    })
+    .select()
+    .single();
   
-  // Add to local cases
-  localCases = [...localCases, newCase];
+  if (error) {
+    console.error('Error creating case:', error);
+    throw new Error('Failed to create case');
+  }
   
-  return newId;
+  return data.id;
 }
 
 export async function updateCase(id: string, caseData: CaseFormData): Promise<string> {
-  // Find the case to update
-  const caseIndex = localCases.findIndex(c => c.id === id);
-  
-  if (caseIndex === -1) {
-    throw new Error('Case not found');
-  }
-  
-  // Get the existing case
-  const existingCase = localCases[caseIndex];
-  
   // Create image URLs from files (in a real app, these would be uploaded to storage)
   const newImageUrls = caseData.images.map(file => URL.createObjectURL(file));
   
-  // Create the updated case
-  const updatedCase: Case = {
-    ...existingCase,
+  const { data, error } = await supabase
+    .from('cases')
+    .update({
     title: caseData.title,
     clinicalInfo: caseData.clinicalInfo,
     expectedFindings: caseData.expectedFindings,
     additionalFindings: caseData.additionalFindings,
     summaryOfPathology: caseData.summaryOfPathology,
-    images: [...(existingCase.images || []), ...newImageUrls],
-    updatedAt: new Date().toISOString()
-  };
+    images: newImageUrls,
+    updated_at: new Date().toISOString()
+    })
+    .eq('id', id)
+    .select()
+    .single();
   
-  // Update the case in the array
-  localCases = [
-    ...localCases.slice(0, caseIndex),
-    updatedCase,
-    ...localCases.slice(caseIndex + 1)
-  ];
+  if (error) {
+    console.error('Error updating case:', error);
+    throw new Error('Failed to update case');
+  }
   
   return id;
 }
 
 export async function deleteCase(id: string): Promise<boolean> {
-  // Filter out the case to delete
-  localCases = localCases.filter(c => c.id !== id);
+  const { error } = await supabase
+    .from('cases')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error deleting case:', error);
+    throw new Error('Failed to delete case');
+  }
+
   return true;
 }
 
 export async function markCaseAsCompleted(id: string, completed: boolean): Promise<boolean> {
-  // Find the case to update
-  const caseIndex = localCases.findIndex(c => c.id === id);
-  
-  if (caseIndex === -1) {
-    throw new Error('Case not found');
+  const { error } = await supabase
+    .from('cases')
+    .update({ 
+      completed,
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', id);
+
+  if (error) {
+    console.error('Error updating case completion:', error);
+    throw new Error('Failed to update case completion status');
   }
-  
-  // Get the existing case
-  const existingCase = localCases[caseIndex];
-  
-  // Create the updated case with completed status
-  const updatedCase: Case = {
-    ...existingCase,
-    completed,
-    updatedAt: new Date().toISOString()
-  };
-  
-  // Update the case in the array
-  localCases = [
-    ...localCases.slice(0, caseIndex),
-    updatedCase,
-    ...localCases.slice(caseIndex + 1)
-  ];
-  
+
   return true;
 }
