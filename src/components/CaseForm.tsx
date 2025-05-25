@@ -398,20 +398,6 @@ const CaseForm: React.FC = () => {
             />
           </div>
           
-          <div className="mb-4">
-            <label className="block text-gray-700 font-medium mb-2">
-              Case Images
-            </label>
-            <a
-              href={imageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              View Images
-            </a>
-          </div>
-          
           <div className="flex justify-end">
             <button
               type="button"
