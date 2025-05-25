@@ -72,11 +72,10 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     completed: false
   };
 
-  const { data, error } = await supabase
   // First check if we're authenticated
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   
-  if (!session) {
+  if (!sessionData.session) {
     throw new Error('Authentication required');
   }
 
