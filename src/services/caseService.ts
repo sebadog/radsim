@@ -45,50 +45,25 @@ export async function fetchCaseById(id: string): Promise<Case | null> {
 }
 
 export async function createCase(caseData: CaseFormData): Promise<string> {
-  // Validate required fields according to RLS policy
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
-
-  if (!title || title.length === 0) {
-    throw new Error('Title is required and cannot be empty');
-  }
-  if (!clinicalInfo || clinicalInfo.length === 0) {
-    throw new Error('Clinical information is required and cannot be empty');
-  }
-  if (!summaryOfPathology || summaryOfPathology.length === 0) {
-    throw new Error('Summary of pathology is required and cannot be empty');
-  }
-
-  // Clean and validate expected findings - ensure it's not empty and contains no empty strings
-  const cleanExpectedFindings = (caseData.expectedFindings || [])
-    .map(finding => finding.trim())
-    .filter(finding => finding.length > 0);
-
-  if (!cleanExpectedFindings.length) {
-    throw new Error('At least one non-empty expected finding is required');
-  }
-
-  // Clean additional findings (optional)
-  const cleanAdditionalFindings = (caseData.additionalFindings || [])
-    .map(finding => finding.trim())
-    .filter(finding => finding.length > 0);
+  const expectedFindings = caseData.expectedFindings || [];
+  const additionalFindings = caseData.additionalFindings || [];
 
   // Generate a unique accession number
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 7).toUpperCase();
   const accessionNumber = `ACC${timestamp}${random}`;
 
-  // Create image URLs array (empty if no images)
   const imageUrls = caseData.images ? caseData.images.map(file => URL.createObjectURL(file)) : [];
 
-  // Construct the case object exactly matching the database schema and RLS requirements
   const newCase = {
     title,
     accession_number: accessionNumber,
     clinical_info: clinicalInfo,
-    expected_findings: cleanExpectedFindings,
-    additional_findings: cleanAdditionalFindings,
+    expected_findings: expectedFindings,
+    additional_findings: additionalFindings,
     summary_of_pathology: summaryOfPathology,
     images: imageUrls,
     completed: false
@@ -109,29 +84,11 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 }
 
 export async function updateCase(id: string, caseData: CaseFormData): Promise<string> {
-  // Validate required fields
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
-
-  if (!title || title.length === 0) {
-    throw new Error('Title is required and cannot be empty');
-  }
-  if (!clinicalInfo || clinicalInfo.length === 0) {
-    throw new Error('Clinical information is required and cannot be empty');
-  }
-  if (!summaryOfPathology || summaryOfPathology.length === 0) {
-    throw new Error('Summary of pathology is required and cannot be empty');
-  }
-
-  // Clean and validate findings
-  const cleanExpectedFindings = (caseData.expectedFindings || [])
-    .map(finding => finding.trim())
-    .filter(finding => finding.length > 0);
-
-  const cleanAdditionalFindings = (caseData.additionalFindings || [])
-    .map(finding => finding.trim())
-    .filter(finding => finding.length > 0);
+  const expectedFindings = caseData.expectedFindings || [];
+  const additionalFindings = caseData.additionalFindings || [];
 
   // Create image URLs from files (in a real app, these would be uploaded to storage)
   const newImageUrls = caseData.images.map(file => URL.createObjectURL(file));
@@ -141,8 +98,8 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
     .update({
       title,
       clinical_info: clinicalInfo,
-      expected_findings: cleanExpectedFindings,
-      additional_findings: cleanAdditionalFindings,
+      expected_findings: expectedFindings,
+      additional_findings: additionalFindings,
       summary_of_pathology: summaryOfPathology,
       images: newImageUrls,
       updated_at: new Date().toISOString()
