@@ -13,6 +13,10 @@ export interface CaseFormData {
   additionalFindings: string[];
   summaryOfPathology: string;
   images: File[];
+  caseNumber: number | null;
+  diagnosis: string;
+  imageUrl: string;
+  surveyUrl: string;
 }
 
 export async function fetchCases(): Promise<Case[]> {
@@ -56,19 +60,24 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   const random = Math.random().toString(36).substring(2, 7).toUpperCase();
   const accessionNumber = `ACC${timestamp}${random}`;
 
-  // For now, use placeholder URLs for images
-  const imageUrls = caseData.images.length > 0 
-    ? ['https://medlineplus.gov/images/Xray_share.jpg']
-    : [];
+  // Use the provided image URL or placeholder
+  const imageUrls = caseData.imageUrl 
+    ? [caseData.imageUrl]
+    : caseData.images.length > 0 
+      ? ['https://medlineplus.gov/images/Xray_share.jpg']
+      : [];
 
   const newCase = {
     title,
+    case_number: caseData.caseNumber,
+    diagnosis: caseData.diagnosis,
     accession_number: accessionNumber,
     clinical_info: clinicalInfo,
     expected_findings: expectedFindings,
     additional_findings: additionalFindings,
     summary_of_pathology: summaryOfPathology,
     images: imageUrls,
+    survey_url: caseData.surveyUrl,
     completed: false
   };
 
@@ -90,21 +99,28 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
-  const expectedFindings = caseData.expectedFindings || [];
-  const additionalFindings = caseData.additionalFindings || [];
+  const expectedFindings = caseData.expectedFindings.filter(f => f.trim());
+  const additionalFindings = caseData.additionalFindings.filter(f => f.trim());
 
-  // Create image URLs from files (in a real app, these would be uploaded to storage)
-  const newImageUrls = caseData.images.map(file => URL.createObjectURL(file));
+  // Use the provided image URL or existing images
+  const imageUrls = caseData.imageUrl 
+    ? [caseData.imageUrl]
+    : caseData.images.length > 0 
+      ? caseData.images.map(file => URL.createObjectURL(file))
+      : [];
   
   const { data, error } = await supabase
     .from('cases')
     .update({
       title,
+      case_number: caseData.caseNumber,
+      diagnosis: caseData.diagnosis,
       clinical_info: clinicalInfo,
       expected_findings: expectedFindings,
       additional_findings: additionalFindings,
       summary_of_pathology: summaryOfPathology,
-      images: newImageUrls,
+      images: imageUrls,
+      survey_url: caseData.surveyUrl,
       updated_at: new Date().toISOString()
     })
     .eq('id', id)

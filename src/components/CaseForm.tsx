@@ -15,7 +15,11 @@ const CaseForm: React.FC = () => {
     expectedFindings: [''],
     additionalFindings: [''],
     summaryOfPathology: '',
-    images: []
+    images: [],
+    caseNumber: null,
+    diagnosis: '',
+    imageUrl: '',
+    surveyUrl: ''
   });
   
   const [existingImages, setExistingImages] = useState<string[]>([]);
@@ -41,11 +45,15 @@ const CaseForm: React.FC = () => {
       
       setFormData({
         title: caseData.title,
-        clinicalInfo: caseData.clinicalInfo,
-        expectedFindings: caseData.expectedFindings.length ? caseData.expectedFindings : [''],
-        additionalFindings: caseData.additionalFindings.length ? caseData.additionalFindings : [''],
-        summaryOfPathology: caseData.summaryOfPathology,
-        images: []
+        clinicalInfo: caseData.clinical_info,
+        expectedFindings: caseData.expected_findings.length ? caseData.expected_findings : [''],
+        additionalFindings: caseData.additional_findings.length ? caseData.additional_findings : [''],
+        summaryOfPathology: caseData.summary_of_pathology,
+        images: [],
+        caseNumber: caseData.case_number || null,
+        diagnosis: caseData.diagnosis || '',
+        imageUrl: caseData.images?.[0] || '',
+        surveyUrl: caseData.survey_url || ''
       });
       
       setExistingImages(caseData.images || []);
@@ -66,19 +74,16 @@ const CaseForm: React.FC = () => {
         images: [...prev.images, ...acceptedFiles]
       }));
       
-      // Create preview URLs for the new images
       const newPreviewUrls = acceptedFiles.map(file => URL.createObjectURL(file));
       setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
     }
   });
   
-  const imageUrl = formData.images.length > 0 ? URL.createObjectURL(formData.images[0]) : '#';
-  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name === 'clinicalInfo' ? 'clinicalInfo' : name]: value
+      [name]: value
     }));
   };
   
@@ -126,11 +131,9 @@ const CaseForm: React.FC = () => {
       images: newImages
     }));
     
-    // Find and revoke the preview URL for the removed file
     const fileUrl = URL.createObjectURL(removedFile);
     URL.revokeObjectURL(fileUrl);
     
-    // Remove the preview URL
     const newPreviewUrls = [...previewUrls];
     newPreviewUrls.splice(index, 1);
     setPreviewUrls(newPreviewUrls);
@@ -160,13 +163,6 @@ const CaseForm: React.FC = () => {
       return;
     }
     
-    // Filter out empty array items
-    const cleanedFormData = {
-      ...formData,
-      expectedFindings: formData.expectedFindings.filter(f => f.trim()),
-      additionalFindings: formData.additionalFindings.filter(f => f.trim())
-    };
-    
     try {
       setLoading(true);
       setError(null);
@@ -191,7 +187,6 @@ const CaseForm: React.FC = () => {
     }
   };
 
-  
   return (
     <div className="p-6 mb-6">
       <div className="mb-6 flex items-center">
@@ -222,38 +217,104 @@ const CaseForm: React.FC = () => {
           <p className="mt-2 text-gray-600">Loading case data...</p>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="text-left">
-          <div className="mb-4">
-            <label htmlFor="title" className="block text-gray-700 font-medium mb-2">
-              Case Title
+        <form onSubmit={handleSubmit} className="text-left space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="caseNumber" className="block text-gray-700 font-medium mb-2">
+                Case Number
+              </label>
+              <input
+                type="number"
+                id="caseNumber"
+                name="caseNumber"
+                value={formData.caseNumber || ''}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter case number"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="title" className="block text-gray-700 font-medium mb-2">
+                Case Title
+              </label>
+              <input
+                type="text"
+                id="title"
+                name="title"
+                value={formData.title}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+                placeholder="Enter case title"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label htmlFor="diagnosis" className="block text-gray-700 font-medium mb-2">
+              Diagnosis
             </label>
             <input
               type="text"
-              id="title"
-              name="title"
-              value={formData.title}
+              id="diagnosis"
+              name="diagnosis"
+              value={formData.diagnosis}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
+              placeholder="Enter diagnosis"
             />
           </div>
           
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-700 font-medium mb-2" htmlFor="clinicalInfo">
               Clinical Information
             </label>
             <textarea
               id="clinicalInfo"
               name="clinicalInfo"
-              value={formData.clinicalInfo || ''}
+              value={formData.clinicalInfo}
               onChange={handleChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={4}
               required
+              placeholder="Enter clinical information"
             />
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="imageUrl" className="block text-gray-700 font-medium mb-2">
+                Image URL
+              </label>
+              <input
+                type="url"
+                id="imageUrl"
+                name="imageUrl"
+                value={formData.imageUrl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter image URL"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="surveyUrl" className="block text-gray-700 font-medium mb-2">
+                Survey URL
+              </label>
+              <input
+                type="url"
+                id="surveyUrl"
+                name="surveyUrl"
+                value={formData.surveyUrl}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter survey URL"
+              />
+            </div>
+          </div>
           
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-700 font-medium mb-2">
               Expected Findings
             </label>
@@ -285,7 +346,7 @@ const CaseForm: React.FC = () => {
             </button>
           </div>
           
-          <div className="mb-4">
+          <div>
             <label className="block text-gray-700 font-medium mb-2">
               Additional Findings (Optional)
             </label>
@@ -317,7 +378,7 @@ const CaseForm: React.FC = () => {
             </button>
           </div>
           
-          <div className="mb-4">
+          <div>
             <label htmlFor="summaryOfPathology" className="block text-gray-700 font-medium mb-2">
               Summary of Pathology
             </label>
@@ -329,6 +390,7 @@ const CaseForm: React.FC = () => {
               rows={5}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+              placeholder="Enter summary of pathology"
             />
           </div>
           
