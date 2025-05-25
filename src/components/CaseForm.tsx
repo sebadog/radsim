@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { AlertTriangle, Save, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, Save, ArrowLeft, Trash2, Plus } from 'lucide-react';
 import { createCase, updateCase, fetchCaseById, CaseFormData } from '../services/caseService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -267,19 +267,20 @@ const CaseForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => removeArrayItem(index, 'expectedFindings')}
-                className="ml-2 p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                className="ml-2 p-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
                 disabled={formData.expectedFindings.length <= 1}
+                title="Remove finding"
               >
-                Remove
+                <Trash2 size={18} />
               </button>
             </div>
           ))}
           <button
             type="button"
             onClick={() => addArrayItem('expectedFindings')}
-            className="mt-1 px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+            className="mt-1 px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 flex items-center"
           >
-            Add Finding
+            <Plus size={18} className="mr-1" /> Add Finding
           </button>
         </div>
         
@@ -299,19 +300,20 @@ const CaseForm: React.FC = () => {
               <button
                 type="button"
                 onClick={() => removeArrayItem(index, 'additionalFindings')}
-                className="ml-2 p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
+                className="ml-2 p-2 bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
                 disabled={formData.additionalFindings.length <= 1}
+                title="Remove finding"
               >
-                Remove
+                <Trash2 size={18} />
               </button>
             </div>
           ))}
           <button
             type="button"
             onClick={() => addArrayItem('additionalFindings')}
-            className="mt-1 px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
+            className="mt-1 px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 flex items-center"
           >
-            Add Additional Finding
+            <Plus size={18} className="mr-1" /> Add Additional Finding
           </button>
         </div>
         
