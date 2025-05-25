@@ -78,7 +78,7 @@ const CaseForm: React.FC = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name === 'clinicalInfo' ? 'clinicalInfo' : name]: value
     }));
   };
   
@@ -245,7 +245,7 @@ const CaseForm: React.FC = () => {
             <textarea
               id="clinicalInfo"
               name="clinicalInfo"
-              value={formData.clinicalInfo}
+              value={formData.clinicalInfo || ''}
               onChange={handleChange}
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               rows={4}
