@@ -151,7 +151,7 @@ function CaseViewer() {
         expectedFindings: currentCase?.expectedFindings || [],
         caseTitle: currentCase?.title || '',
         clinicalInfo: currentCase?.clinical_info || '',
-        summaryOfPathology: currentCase?.summaryOfPathology || ''
+        summaryOfPathology: currentCase?.summary_of_pathology || ''
       });
       
       // Save the current attempt before updating state
@@ -200,7 +200,7 @@ function CaseViewer() {
         currentCase?.expectedFindings || [],
         currentCase?.title || '',
         currentCase?.clinical_info || '',
-        currentCase?.summaryOfPathology || ''
+        currentCase?.summary_of_pathology || ''
       );
       
       // Save the current attempt before updating state
@@ -448,7 +448,7 @@ function CaseViewer() {
                 <h3 className="font-medium text-gray-700 mb-2">Teaching Points:</h3>
                 <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
                   <h4 className="font-medium mb-2">Summary of Pathology:</h4>
-                  <p className="mb-4">{currentCase?.summaryOfPathology}</p>
+                  <p className="mb-4">{currentCase?.summary_of_pathology}</p>
                 </div>
               </div>
             )}
