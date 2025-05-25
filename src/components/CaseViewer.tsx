@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
 import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
 import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
@@ -291,6 +291,34 @@ function CaseViewer() {
             <ChevronRight size={20} />
           </button>
         </div>
+      </div>
+
+      {/* Case Links */}
+      <div className="mb-6 flex space-x-4">
+        {currentCase.images && currentCase.images.length > 0 && (
+          <a 
+            href={currentCase.images[0]} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors"
+          >
+            <FileImage size={18} className="mr-2" />
+            View Image
+            <ExternalLink size={14} className="ml-1" />
+          </a>
+        )}
+        {currentCase.survey_url && (
+          <a 
+            href={currentCase.survey_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors"
+          >
+            <FormInput size={18} className="mr-2" />
+            Take Survey
+            <ExternalLink size={14} className="ml-1" />
+          </a>
+        )}
       </div>
 
       {apiKeyMissing && (
