@@ -146,6 +146,14 @@ const CaseForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Check authentication first
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      setError('Please sign in to create or edit cases');
+      return;
+    }
+    
     // Validate form
     if (!formData.title.trim()) {
       setError('Title is required');
@@ -178,14 +186,22 @@ const CaseForm: React.FC = () => {
       setLoading(true);
       setError(null);
       
+      // Clean the form data
+      const cleanedFormData = {
+        ...formData,
+        expectedFindings: formData.expectedFindings.filter(f => f.trim()),
+        additionalFindings: formData.additionalFindings.filter(f => f.trim())
+      };
+      
       if (isEditMode) {
-        await updateCase(id!, cleanedFormData);
+        await updateCase(id!, formData);
       } else {
-        await createCase(cleanedFormData);
+        await createCase(formData);
       }
       
       navigate('/');
     } catch (err: any) {
+      console.error('Form submission error:', err);
       setError(err.message || 'Failed to save case');
       setLoading(false);
     }

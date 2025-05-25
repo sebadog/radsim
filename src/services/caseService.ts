@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Case } from '../types/case';
 
-const supabase = createClient(
+export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
   import.meta.env.VITE_SUPABASE_ANON_KEY!
 );
@@ -48,15 +48,18 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   const title = caseData.title?.trim();
   const clinicalInfo = caseData.clinicalInfo?.trim();
   const summaryOfPathology = caseData.summaryOfPathology?.trim();
-  const expectedFindings = caseData.expectedFindings || [];
-  const additionalFindings = caseData.additionalFindings || [];
+  const expectedFindings = caseData.expectedFindings.filter(f => f.trim());
+  const additionalFindings = caseData.additionalFindings.filter(f => f.trim());
 
   // Generate a unique accession number
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 7).toUpperCase();
   const accessionNumber = `ACC${timestamp}${random}`;
 
-  const imageUrls = caseData.images ? caseData.images.map(file => URL.createObjectURL(file)) : [];
+  // For now, use placeholder URLs for images
+  const imageUrls = caseData.images.length > 0 
+    ? ['https://medlineplus.gov/images/Xray_share.jpg']
+    : [];
 
   const newCase = {
     title,
@@ -70,13 +73,21 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   };
 
   const { data, error } = await supabase
+  // First check if we're authenticated
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    throw new Error('Authentication required');
+  }
+
+  const { data, error } = await supabase
     .from('cases')
     .insert([newCase])
     .select()
     .single();
 
   if (error) {
-    console.error('Error creating case:', error);
+    console.error('Error creating case:', error.message);
     throw new Error(`Failed to create case: ${error.message}`);
   }
 
