@@ -110,7 +110,7 @@ function createPrompt(request: FeedbackRequest): string {
   const userImpression = request.userImpression || '';
 
   return `
-You are a trainer for radiology residents and fellows. The trainee has reviewed radiological images and written a diagnostic impression. 
+You are a trainer for radiology residents and fellows. The trainee has reviewed radiological images and written a diagnostic impression. They will be allowed multiple attempts to identify the findings correctly.
 
 Case Information:
 - Title: ${caseTitle}
@@ -125,9 +125,10 @@ The trainee's impression:
 Please evaluate the trainee's response following these instructions:
 1. Check if the trainee correctly identified all expected findings.
 2. Provide feedback using the Socratic method:
-   - If findings are correctly identified, congratulate the trainee.
-   - If findings are missed, ask the trainee to review the images focusing on the area of interest. Give only one clue per finding without revealing the diagnosis.
-   - If findings are detected but misinterpreted, encourage the trainee to consider other possible etiologies.
+   - If findings are correctly identified, congratulate the trainee and explain why their interpretation is correct.
+   - If findings are missed, ask the trainee to review specific areas of interest. Give one focused clue per finding without revealing the diagnosis.
+   - If findings are detected but misinterpreted, guide them to reconsider their interpretation by highlighting key features they may have overlooked.
+   - Encourage critical thinking by asking questions that help them analyze the image systematically.
 3. Determine a score:
    - 100 points if all findings are correctly identified
    - No score yet if findings are partially identified or missed (the trainee will get more attempts)
@@ -135,8 +136,10 @@ Please evaluate the trainee's response following these instructions:
 CRITICAL INSTRUCTIONS:
 - NEVER reveal the expected findings or diagnosis in your feedback
 - NEVER show the expected impression unless the trainee has correctly identified all findings
-- ALWAYS provide clues that help the trainee think through the case themselves
-- The trainee will be allowed to make multiple attempts, so your feedback should guide them toward the correct answer without giving it away
+- ALWAYS provide specific, focused clues that help the trainee think through the case themselves
+- Each clue should build upon previous feedback and guide them closer to the correct interpretation
+- Use a step-by-step approach to help them systematically analyze the images
+- Acknowledge correct observations while guiding them to look for additional findings
 - Do not assign a score of 0 - only assign 100 for correct answers or no score for incomplete answers
 
 Format your response as follows:
@@ -154,14 +157,18 @@ function parseLLMResponse(response: string, request: FeedbackRequest): FeedbackR
   let showExpectedImpression = false;
   let clueGiven = false;
   
-  // Try to extract structured data if the LLM followed the format
+  // Extract structured data from LLM response with improved parsing
   const feedbackMatch = response.match(/FEEDBACK:\s*([\s\S]*?)(?=SCORE:|$)/i);
   const scoreMatch = response.match(/SCORE:\s*(\d+)/i);
   const clueMatch = response.match(/CLUE_GIVEN:\s*(true|false)/i);
   const showExpectedMatch = response.match(/SHOW_EXPECTED:\s*(true|false)/i);
   
   if (feedbackMatch) {
-    feedback = feedbackMatch[1].trim();
+    // Clean up the feedback text and ensure proper formatting
+    feedback = feedbackMatch[1]
+      .trim()
+      .replace(/\n{3,}/g, '\n\n') // Normalize multiple newlines
+      .replace(/^\s+/gm, ''); // Remove leading whitespace from each line
   }
   
   if (scoreMatch) {
@@ -176,21 +183,23 @@ function parseLLMResponse(response: string, request: FeedbackRequest): FeedbackR
     showExpectedImpression = showExpectedMatch[1].toLowerCase() === 'true';
   }
   
-  // If the LLM didn't follow the format, make a best guess
+  // Enhanced scoring logic for multiple attempts
   if (score === null) {
     // Add safety check for expectedFindings
     const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
     
-    // Check if all expected findings are mentioned in the user impression
-    const allFound = expectedFindings.every(finding => 
-      request.userImpression.toLowerCase().includes(finding.substring(0, Math.min(20, finding.length)).toLowerCase())
-    );
+    // More sophisticated matching that looks for key concepts rather than exact matches
+    const allFound = expectedFindings.every(finding => {
+      const keyTerms = finding.toLowerCase().split(/\s+/).filter(term => term.length > 3);
+      const impression = request.userImpression.toLowerCase();
+      return keyTerms.some(term => impression.includes(term));
+    });
     
     if (allFound) {
       score = 100;
       showExpectedImpression = true;
     } else {
-      // If not all findings were found, provide a clue
+      // Provide progressive feedback for partial matches
       score = null;
       clueGiven = true;
       showExpectedImpression = false;
