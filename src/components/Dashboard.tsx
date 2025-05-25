@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
 import { fetchCases, deleteCase, markCaseAsCompleted } from '../services/caseService';
 import { Case } from '../types/case';
 
@@ -8,7 +8,6 @@ function Dashboard() {
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'completed' | 'incomplete'>('all');
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [password, setPassword] = useState('');
@@ -35,13 +34,12 @@ function Dashboard() {
   }, []);
 
   const handleDeleteCase = async (id: string) => {
-    if (deleteConfirm !== id) {
-      setDeleteConfirm(id);
-      return;
+    try {
+      await deleteCase(id);
+      setCases(cases.filter(c => c.id !== id));
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete case');
     }
-
-    setActionAfterAuth({type: 'delete', id});
-    setShowPasswordModal(true);
   };
 
   const handleEditCase = (id: string) => {
@@ -74,9 +72,7 @@ function Dashboard() {
       setPasswordError(null);
       
       if (actionAfterAuth) {
-        if (actionAfterAuth.type === 'delete') {
-          performDelete(actionAfterAuth.id);
-        } else if (actionAfterAuth.type === 'edit') {
+        if (actionAfterAuth.type === 'edit') {
           if (actionAfterAuth.id === 'new') {
             navigate('/cases/new', { state: { isAuthenticated: true } });
           } else {
@@ -89,16 +85,6 @@ function Dashboard() {
       setActionAfterAuth(null);
     } else {
       setPasswordError('Incorrect password. Please try again.');
-    }
-  };
-
-  const performDelete = async (id: string) => {
-    try {
-      await deleteCase(id);
-      setCases(cases.filter(c => c.id !== id));
-      setDeleteConfirm(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete case');
     }
   };
 
@@ -153,7 +139,6 @@ function Dashboard() {
                     setPasswordError(null);
                     setPassword('');
                     setActionAfterAuth(null);
-                    setDeleteConfirm(null);
                   }}
                   className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
                 >
@@ -243,7 +228,7 @@ function Dashboard() {
             >
               <div className={`p-4 flex justify-between items-center ${caseItem.completed ? 'bg-green-100' : 'bg-white'}`}>
                 <h3 className="font-semibold text-lg text-gray-800">
-                  {caseItem.case_number ? `Case ${caseItem.case_number}: ` : ''}{caseItem.title}
+                  {caseItem.title}
                 </h3>
                 <button
                   onClick={(e) => handleToggleCompleted(e, caseItem.id, caseItem.completed || false)}
@@ -298,12 +283,8 @@ function Dashboard() {
                     </button>
                     <button
                       onClick={() => handleDeleteCase(caseItem.id)}
-                      className={`p-1.5 rounded transition-colors ${
-                        deleteConfirm === caseItem.id
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                      title={deleteConfirm === caseItem.id ? 'Confirm Delete' : 'Delete'}
+                      className="p-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                      title="Delete"
                     >
                       <Trash2 size={16} />
                     </button>
