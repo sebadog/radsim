@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
-import { fetchCaseById, fetchCases } from '../services/caseService';
+import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
 import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
 
@@ -28,6 +28,7 @@ function CaseViewer() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [completionUpdating, setCompletionUpdating] = useState(false);
   const [totalScore, setTotalScore] = useState<number>(0);
 
   const openRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -140,6 +141,22 @@ function CaseViewer() {
     }
   };
 
+  const handleToggleCompleted = async () => {
+    try {
+      setCompletionUpdating(true);
+      const newCompletedStatus = !(currentCase?.completed || false);
+      await markCaseAsCompleted(caseId!, newCompletedStatus);
+      setCurrentCase({
+        ...currentCase,
+        completed: newCompletedStatus
+      });
+    } catch (err: any) {
+      setError(err.message || 'Failed to update case status');
+    } finally {
+      setCompletionUpdating(false);
+    }
+  };
+
   const handleGiveUp = () => {
     setGaveUp(true);
     setShowExpectedImpression(true);
@@ -223,6 +240,27 @@ function CaseViewer() {
         </div>
         
         <div className="flex space-x-2">
+          <button 
+            onClick={handleToggleCompleted}
+            disabled={completionUpdating}
+            className={`px-3 py-1.5 rounded-md flex items-center ${
+              completionUpdating 
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                : currentCase.completed 
+                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                  : 'bg-green-100 text-green-700 hover:bg-green-200'
+            }`}
+          >
+            {completionUpdating ? (
+              <Loader2 size={16} className="mr-1.5 animate-spin" />
+            ) : currentCase.completed ? (
+              <Circle size={16} className="mr-1.5" />
+            ) : (
+              <CheckCircle size={16} className="mr-1.5" />
+            )}
+            {currentCase.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
+          </button>
+          
           <button 
             onClick={prevCase}
             disabled={currentCaseIndex === 0}
@@ -397,6 +435,35 @@ function CaseViewer() {
             className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
           >
             Reset Case
+          </button>
+          
+          <button
+            onClick={handleToggleCompleted}
+            disabled={completionUpdating}
+            className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 flex items-center ${
+              completionUpdating 
+                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+                : currentCase.completed 
+                  ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500' 
+                  : 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
+            }`}
+          >
+            {completionUpdating ? (
+              <>
+                <Loader2 className="animate-spin mr-2" size={18} />
+                Updating...
+              </>
+            ) : currentCase.completed ? (
+              <>
+                <Circle className="mr-2" size={18} />
+                Mark as Incomplete
+              </>
+            ) : (
+              <>
+                <CheckCircle className="mr-2" size={18} />
+                Mark as Completed
+              </>
+            )}
           </button>
         </div>
       </div>
