@@ -91,7 +91,7 @@ function CaseViewer() {
   const handleToggleCompleted = async () => {
     try {
       setCompletionUpdating(true);
-      const newCompletedStatus = !(currentCase.completed || false);
+      const newCompletedStatus = !(currentCase?.completed || false);
       await markCaseAsCompleted(caseId!, newCompletedStatus);
       setCurrentCase({
         ...currentCase,
@@ -148,10 +148,10 @@ function CaseViewer() {
     try {
       const result = await generateFeedback({
         userImpression,
-        expectedFindings: currentCase.expectedFindings,
-        caseTitle: currentCase.title,
-        clinicalInfo: currentCase.clinicalInfo,
-        summaryOfPathology: currentCase.summaryOfPathology
+        expectedFindings: currentCase?.expectedFindings || [],
+        caseTitle: currentCase?.title || '',
+        clinicalInfo: currentCase?.clinicalInfo || '',
+        summaryOfPathology: currentCase?.summaryOfPathology || ''
       });
       
       // Save the current attempt before updating state
@@ -197,10 +197,10 @@ function CaseViewer() {
       const result = await generateResponseToClue(
         userImpression,
         responseToClue,
-        currentCase.expectedFindings,
-        currentCase.title,
-        currentCase.clinicalInfo,
-        currentCase.summaryOfPathology
+        currentCase?.expectedFindings || [],
+        currentCase?.title || '',
+        currentCase?.clinicalInfo || '',
+        currentCase?.summaryOfPathology || ''
       );
       
       // Save the current attempt before updating state
@@ -282,10 +282,10 @@ function CaseViewer() {
           >
             <ArrowLeft size={20} />
           </button>
-          <h2 className="text-xl font-semibold">Case: {currentCase.title}</h2>
+          <h2 className="text-xl font-semibold">Case: {currentCase?.title}</h2>
           
           {/* Status badge */}
-          {currentCase.completed ? (
+          {currentCase?.completed ? (
             <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
               <CheckCircle size={12} className="mr-1" /> Completed
             </span>
@@ -298,19 +298,19 @@ function CaseViewer() {
             className={`px-3 py-1.5 rounded-md flex items-center ${
               completionUpdating 
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : currentCase.completed 
+                : currentCase?.completed 
                   ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
                   : 'bg-green-100 text-green-700 hover:bg-green-200'
             }`}
           >
             {completionUpdating ? (
               <Loader2 size={16} className="mr-1.5 animate-spin" />
-            ) : currentCase.completed ? (
+            ) : currentCase?.completed ? (
               <Circle size={16} className="mr-1.5" />
             ) : (
               <CheckCircle size={16} className="mr-1.5" />
             )}
-            {currentCase.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
+            {currentCase?.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
           </button>
           <button 
             onClick={prevCase}
@@ -338,7 +338,7 @@ function CaseViewer() {
 
       <div className="mb-4">
         <h3 className="font-medium text-gray-700 mb-2">Clinical Information:</h3>
-        <p className="bg-gray-50 p-3 rounded">{currentCase.clinicalInfo}</p>
+        <p className="bg-gray-50 p-3 rounded">{currentCase?.clinicalInfo}</p>
       </div>
 
       <div className="w-full max-w-2xl mx-auto text-left">
@@ -430,7 +430,7 @@ function CaseViewer() {
               </div>
             )}
 
-            {showExpectedImpression && (
+            {showExpectedImpression && currentCase?.expectedFindings && (
               <div className="mt-4">
                 <h3 className="font-medium text-gray-700 mb-2">Expected Impression:</h3>
                 <div className="bg-gray-50 p-3 rounded">
@@ -448,7 +448,7 @@ function CaseViewer() {
                 <h3 className="font-medium text-gray-700 mb-2">Teaching Points:</h3>
                 <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
                   <h4 className="font-medium mb-2">Summary of Pathology:</h4>
-                  <p className="mb-4">{currentCase.summaryOfPathology}</p>
+                  <p className="mb-4">{currentCase?.summaryOfPathology}</p>
                 </div>
               </div>
             )}
@@ -492,7 +492,7 @@ function CaseViewer() {
                 className={`px-4 py-2 rounded-md focus:outline-none focus:ring-2 flex items-center ${
                   completionUpdating 
                     ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                    : currentCase.completed 
+                    : currentCase?.completed 
                       ? 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500' 
                       : 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500'
                 }`}
@@ -502,7 +502,7 @@ function CaseViewer() {
                     <Loader2 className="animate-spin mr-2" size={18} />
                     Updating...
                   </>
-                ) : currentCase.completed ? (
+                ) : currentCase?.completed ? (
                   <>
                     <Circle className="mr-2" size={18} />
                     Mark as Incomplete
