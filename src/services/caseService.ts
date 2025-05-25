@@ -46,25 +46,31 @@ export async function fetchCaseById(id: string): Promise<Case | null> {
 
 export async function createCase(caseData: CaseFormData): Promise<string> {
   // Validate required fields according to RLS policy
-  if (!caseData.title || caseData.title.trim().length === 0) {
-    throw new Error('Title is required');
+  const title = caseData.title?.trim();
+  const clinicalInfo = caseData.clinicalInfo?.trim();
+  const summaryOfPathology = caseData.summaryOfPathology?.trim();
+  
+  if (!title || title.length === 0) {
+    throw new Error('Title is required and cannot be empty');
   }
-  if (!caseData.clinicalInfo || caseData.clinicalInfo.trim().length === 0) {
-    throw new Error('Clinical information is required');
+  if (!clinicalInfo || clinicalInfo.length === 0) {
+    throw new Error('Clinical information is required and cannot be empty');
   }
-  if (!caseData.expectedFindings || caseData.expectedFindings.length === 0) {
-    throw new Error('Expected findings are required');
-  }
-  if (!caseData.summaryOfPathology || caseData.summaryOfPathology.trim().length === 0) {
-    throw new Error('Summary of pathology is required');
+  if (!summaryOfPathology || summaryOfPathology.length === 0) {
+    throw new Error('Summary of pathology is required and cannot be empty');
   }
 
   // Remove any empty strings from arrays to satisfy RLS policy
-  const cleanExpectedFindings = caseData.expectedFindings.filter(finding => finding.trim().length > 0);
-  const cleanAdditionalFindings = caseData.additionalFindings.filter(finding => finding.trim().length > 0);
+  const cleanExpectedFindings = (caseData.expectedFindings || [])
+    .map(finding => finding.trim())
+    .filter(finding => finding.length > 0);
+
+  const cleanAdditionalFindings = (caseData.additionalFindings || [])
+    .map(finding => finding.trim())
+    .filter(finding => finding.length > 0);
 
   // Ensure we have at least one expected finding after cleaning
-  if (cleanExpectedFindings.length === 0) {
+  if (!cleanExpectedFindings.length) {
     throw new Error('At least one non-empty expected finding is required');
   }
 
@@ -77,16 +83,14 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   const imageUrls = caseData.images ? caseData.images.map(file => URL.createObjectURL(file)) : [];
 
   const newCase = {
-    title: caseData.title.trim(),
+    title,
     accession_number: accessionNumber,
-    clinical_info: caseData.clinicalInfo.trim(),
+    clinical_info: clinicalInfo,
     expected_findings: cleanExpectedFindings,
     additional_findings: cleanAdditionalFindings,
-    summary_of_pathology: caseData.summaryOfPathology.trim(),
+    summary_of_pathology: summaryOfPathology,
     images: imageUrls,
-    completed: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
+    completed: false
   };
 
   const { data, error } = await supabase
