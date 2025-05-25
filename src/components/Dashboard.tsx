@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
 import { fetchCases, deleteCase, markCaseAsCompleted } from '../services/caseService';
 import { Case } from '../types/case';
 
@@ -37,6 +37,7 @@ function Dashboard() {
   const handleDeleteCase = async (id: string) => {
     if (deleteConfirm !== id) {
       setDeleteConfirm(id);
+      setTimeout(() => setDeleteConfirm(null), 3000); // Reset after 3 seconds
       return;
     }
 
@@ -243,7 +244,7 @@ function Dashboard() {
             >
               <div className={`p-4 flex justify-between items-center ${caseItem.completed ? 'bg-green-100' : 'bg-white'}`}>
                 <h3 className="font-semibold text-lg text-gray-800">
-                  {caseItem.case_number ? `Case ${caseItem.case_number}: ` : ''}{caseItem.title}
+                  {caseItem.title}
                 </h3>
                 <button
                   onClick={(e) => handleToggleCompleted(e, caseItem.id, caseItem.completed || false)}
@@ -300,10 +301,10 @@ function Dashboard() {
                       onClick={() => handleDeleteCase(caseItem.id)}
                       className={`p-1.5 rounded transition-colors ${
                         deleteConfirm === caseItem.id
-                          ? 'bg-red-500 text-white'
+                          ? 'bg-red-500 text-white animate-pulse'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
-                      title={deleteConfirm === caseItem.id ? 'Confirm Delete' : 'Delete'}
+                      title={deleteConfirm === caseItem.id ? 'Click again to confirm delete' : 'Delete'}
                     >
                       <Trash2 size={16} />
                     </button>
