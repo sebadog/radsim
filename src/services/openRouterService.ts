@@ -15,6 +15,12 @@ interface FeedbackRequest {
   caseTitle: string;
   clinicalInfo: string;
   summaryOfPathology: string;
+  accessionNumber: string;
+  additionalFindings: string[];
+  images: string[];
+  completed: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 interface FeedbackResponse {
@@ -102,6 +108,7 @@ export async function generateFeedback(request: FeedbackRequest): Promise<Feedba
 
 function createPrompt(request: FeedbackRequest): string {
   const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
+  const additionalFindings = Array.isArray(request.additionalFindings) ? request.additionalFindings : [];
   const pointsPerFinding = Math.floor(100 / expectedFindings.length);
 
   return `
@@ -109,10 +116,17 @@ Evaluate this radiology trainee's response by comparing it exactly with the expe
 
 Case Information:
 Title: ${request.caseTitle}
+Accession Number: ${request.accessionNumber}
 Clinical Information: ${request.clinicalInfo}
+Summary of Pathology: ${request.summaryOfPathology}
+Number of Images: ${request.images?.length || 0}
+Additional Findings Present: ${additionalFindings.length > 0 ? 'Yes' : 'No'}
 
 Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
+
+Additional Findings (For context, not required for scoring):
+${additionalFindings.map(finding => `- ${finding}`).join('\n')}
 
 Trainee's impression:
 "${request.userImpression}"
@@ -123,6 +137,7 @@ Evaluation Instructions:
    - Award ${pointsPerFinding} points ONLY for exact matches
    - For non-exact matches, provide a clue that helps identify the specific finding
    - Do not accept similar or partial matches
+   - Consider the clinical context and pathology summary when providing feedback
 
 2. Calculate total score:
    - Sum points only for exact matches
@@ -133,6 +148,7 @@ Evaluation Instructions:
    - For exact matches: Confirm the correct finding
    - For non-matches: Provide specific clues about what to look for
    - Be educational but don't reveal unmatched findings
+   - Reference the clinical information and pathology when relevant
 
 Format your response as:
 FEEDBACK: [Your detailed feedback]
@@ -217,6 +233,7 @@ export async function generateSecondAttemptFeedback(
     }
 
     const expectedFindings = Array.isArray(request.expectedFindings) ? request.expectedFindings : [];
+    const additionalFindings = Array.isArray(request.additionalFindings) ? request.additionalFindings : [];
     const pointsPerFinding = Math.floor(100 / expectedFindings.length);
 
     const prompt = `
@@ -224,10 +241,17 @@ Evaluate this radiology trainee's second attempt by comparing it exactly with th
 
 Case Information:
 Title: ${request.caseTitle}
+Accession Number: ${request.accessionNumber}
 Clinical Information: ${request.clinicalInfo}
+Summary of Pathology: ${request.summaryOfPathology}
+Number of Images: ${request.images?.length || 0}
+Additional Findings Present: ${additionalFindings.length > 0 ? 'Yes' : 'No'}
 
 Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
 ${expectedFindings.map(finding => `- ${finding}`).join('\n')}
+
+Additional Findings (For context, not required for scoring):
+${additionalFindings.map(finding => `- ${finding}`).join('\n')}
 
 First attempt:
 "${firstAttempt}"
@@ -241,6 +265,7 @@ Evaluation Instructions:
    - Award ${pointsPerFinding} points for exact matches in first attempt
    - Award ${pointsPerFinding/2} points for exact matches in second attempt
    - No points for non-exact matches
+   - Consider the clinical context and pathology summary
 
 2. Calculate total score:
    - Sum points from both attempts
@@ -250,6 +275,7 @@ Evaluation Instructions:
 3. Feedback format:
    - Identify which findings matched exactly in each attempt
    - Explain any remaining non-matches
+   - Reference the clinical information and pathology when relevant
    - Be educational and supportive
 
 Format your response as:
