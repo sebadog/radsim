@@ -60,21 +60,21 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
     throw new Error('Summary of pathology is required and cannot be empty');
   }
 
-  // Remove any empty strings from arrays to satisfy RLS policy
+  // Clean and validate expected findings
   const cleanExpectedFindings = (caseData.expectedFindings || [])
     .map(finding => finding.trim())
     .filter(finding => finding.length > 0);
 
-  const cleanAdditionalFindings = (caseData.additionalFindings || [])
-    .map(finding => finding.trim())
-    .filter(finding => finding.length > 0);
-
-  // Ensure we have at least one expected finding after cleaning
   if (!cleanExpectedFindings.length) {
     throw new Error('At least one non-empty expected finding is required');
   }
 
-  // Generate a unique accession number (required by RLS policy)
+  // Clean additional findings (optional)
+  const cleanAdditionalFindings = (caseData.additionalFindings || [])
+    .map(finding => finding.trim())
+    .filter(finding => finding.length > 0);
+
+  // Generate a unique accession number
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 7).toUpperCase();
   const accessionNumber = `ACC${timestamp}${random}`;
@@ -82,12 +82,13 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
   // Create image URLs array (empty if no images)
   const imageUrls = caseData.images ? caseData.images.map(file => URL.createObjectURL(file)) : [];
 
+  // Construct the case object exactly matching the database schema
   const newCase = {
     title,
     accession_number: accessionNumber,
     clinical_info: clinicalInfo,
     expected_findings: cleanExpectedFindings,
-    additional_findings: cleanAdditionalFindings,
+    additional_findings: cleanAdditionalFindings || [], // Ensure it's never null
     summary_of_pathology: summaryOfPathology,
     images: imageUrls,
     completed: false
@@ -95,7 +96,7 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 
   const { data, error } = await supabase
     .from('cases')
-    .insert(newCase)
+    .insert([newCase]) // Wrap in array to match Supabase's expected format
     .select()
     .single();
 
