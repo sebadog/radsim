@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { useDropzone } from 'react-dropzone';
+import { useNavigate, useParams } from 'react-router-dom';
+import { AlertTriangle, Save, ArrowLeft } from 'lucide-react';
 import { createCase, updateCase, fetchCaseById, CaseFormData } from '../services/caseService';
-import { X, Upload, Plus, AlertTriangle, Save, ArrowLeft, Lock } from 'lucide-react';
 
 const CaseForm: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,15 +14,12 @@ const CaseForm: React.FC = () => {
     expectedFindings: [''],
     additionalFindings: [''],
     summaryOfPathology: '',
-    images: [],
     imageUrl: '',
     surveyUrl: ''
   });
   
-  const [existingImages, setExistingImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   
   useEffect(() => {
     if (isEditMode) {
@@ -47,33 +43,15 @@ const CaseForm: React.FC = () => {
         expectedFindings: caseData.expected_findings.length ? caseData.expected_findings : [''],
         additionalFindings: caseData.additional_findings.length ? caseData.additional_findings : [''],
         summaryOfPathology: caseData.summary_of_pathology,
-        images: [],
         imageUrl: caseData.images?.[0] || '',
         surveyUrl: caseData.survey_url || ''
       });
-      
-      setExistingImages(caseData.images || []);
     } catch (err: any) {
       setError(err.message || 'Failed to load case');
     } finally {
       setLoading(false);
     }
   };
-  
-  const { getRootProps, getInputProps } = useDropzone({
-    accept: {
-      'image/*': ['.jpeg', '.jpg', '.png', '.gif']
-    },
-    onDrop: (acceptedFiles) => {
-      setFormData(prev => ({
-        ...prev,
-        images: [...prev.images, ...acceptedFiles]
-      }));
-      
-      const newPreviewUrls = acceptedFiles.map(file => URL.createObjectURL(file));
-      setPreviewUrls(prev => [...prev, ...newPreviewUrls]);
-    }
-  });
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -118,23 +96,6 @@ const CaseForm: React.FC = () => {
     }));
   };
   
-  const removeImage = (index: number) => {
-    const newImages = [...formData.images];
-    const removedFile = newImages.splice(index, 1)[0];
-    
-    setFormData(prev => ({
-      ...prev,
-      images: newImages
-    }));
-    
-    const fileUrl = URL.createObjectURL(removedFile);
-    URL.revokeObjectURL(fileUrl);
-    
-    const newPreviewUrls = [...previewUrls];
-    newPreviewUrls.splice(index, 1);
-    setPreviewUrls(newPreviewUrls);
-  };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -169,9 +130,10 @@ const CaseForm: React.FC = () => {
       }
       
       navigate('/');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Form submission error:', err);
       setError(err.message || 'Failed to save case');
+    } finally {
       setLoading(false);
     }
   };
@@ -195,15 +157,12 @@ const CaseForm: React.FC = () => {
         </div>
       )}
       
-      {loading && !isEditMode ? (
+      {loading ? (
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-          <p className="mt-2 text-gray-600">Creating case...</p>
-        </div>
-      ) : loading && isEditMode ? (
-        <div className="text-center py-8">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-500 border-t-transparent"></div>
-          <p className="mt-2 text-gray-600">Loading case data...</p>
+          <p className="mt-2 text-gray-600">
+            {isEditMode ? 'Loading case data...' : 'Creating case...'}
+          </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="text-left space-y-6">
@@ -290,16 +249,16 @@ const CaseForm: React.FC = () => {
                   className="ml-2 p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
                   disabled={formData.expectedFindings.length <= 1}
                 >
-                  <X size={18} />
+                  Remove
                 </button>
               </div>
             ))}
             <button
               type="button"
               onClick={() => addArrayItem('expectedFindings')}
-              className="mt-1 flex items-center text-blue-600 hover:text-blue-800"
+              className="mt-1 px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
             >
-              <Plus size={16} className="mr-1" /> Add Finding
+              Add Finding
             </button>
           </div>
           
@@ -322,16 +281,16 @@ const CaseForm: React.FC = () => {
                   className="ml-2 p-2 bg-red-100 text-red-600 rounded hover:bg-red-200"
                   disabled={formData.additionalFindings.length <= 1}
                 >
-                  <X size={18} />
+                  Remove
                 </button>
               </div>
             ))}
             <button
               type="button"
               onClick={() => addArrayItem('additionalFindings')}
-              className="mt-1 flex items-center text-blue-600 hover:text-blue-800"
+              className="mt-1 px-3 py-1 bg-blue-100 text-blue-600 rounded hover:bg-blue-200"
             >
-              <Plus size={16} className="mr-1" /> Add Additional Finding
+              Add Additional Finding
             </button>
           </div>
           

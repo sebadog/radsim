@@ -12,7 +12,6 @@ export interface CaseFormData {
   expectedFindings: string[];
   additionalFindings: string[];
   summaryOfPathology: string;
-  images: File[];
   imageUrl: string;
   surveyUrl: string;
 }
@@ -59,9 +58,7 @@ export async function createCase(caseData: CaseFormData): Promise<string> {
 
   const imageUrls = caseData.imageUrl 
     ? [caseData.imageUrl]
-    : caseData.images.length > 0 
-      ? ['https://medlineplus.gov/images/Xray_share.jpg']
-      : [];
+    : ['https://medlineplus.gov/images/Xray_share.jpg'];
 
   const newCase = {
     title,
@@ -98,9 +95,7 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<st
 
   const imageUrls = caseData.imageUrl 
     ? [caseData.imageUrl]
-    : caseData.images.length > 0 
-      ? caseData.images.map(file => URL.createObjectURL(file))
-      : [];
+    : ['https://medlineplus.gov/images/Xray_share.jpg'];
   
   const { data, error } = await supabase
     .from('cases')
