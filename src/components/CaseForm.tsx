@@ -317,22 +317,6 @@ const CaseForm: React.FC = () => {
           </button>
         </div>
         
-        <div>
-          <label htmlFor="summaryOfPathology" className="block text-gray-700 font-medium mb-2">
-            Summary of Pathology
-          </label>
-          <textarea
-            id="summaryOfPathology"
-            name="summaryOfPathology"
-            value={formData.summaryOfPathology}
-            onChange={handleChange}
-            rows={5}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-            placeholder="Enter summary of pathology"
-          />
-        </div>
-        
         <div className="flex justify-end">
           <button
             type="button"
