@@ -39,7 +39,7 @@ function App() {
   const location = useLocation();
 
   useEffect(() => {
-    if (!user && location.pathname !== '/auth') {
+    if (!user && !location.pathname.startsWith('/auth') && !location.pathname.startsWith('/reset-password')) {
       navigate('/auth', { replace: true });
     }
   }, [user, location.pathname, navigate]);
@@ -87,8 +87,7 @@ function App() {
       <main className="w-full max-w-none px-4 mt-4 flex-grow">
         <Routes>
           <Route path="/auth" element={<Auth />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/reset-password/update" element={<ResetPassword />} />
+          <Route path="/reset-password/*" element={<ResetPassword />} />
           <Route
             path="/"
             element={
