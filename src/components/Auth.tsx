@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Check, X, GraduationCap, BookOpen, Award } from 'lucide-react';
+import { Eye, EyeOff, Check, X, GraduationCap, BookOpen, Award, Brain, Stethoscope, LineChart } from 'lucide-react';
 
 export function Auth() {
   const [email, setEmail] = useState('');
@@ -63,71 +63,74 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* Left side - Platform information */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white relative">
-        <div className="max-w-md mx-auto">
-          <div className="flex items-center justify-center mb-12 bg-white rounded-xl p-8 shadow-lg">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        {/* Header for mobile */}
+        <div className="lg:hidden bg-white shadow-sm p-6">
+          <div className="max-w-sm mx-auto">
             <img 
               src="https://i.imgur.com/e4dcEWm.png" 
               alt="RadSim Logo" 
-              className="h-32"
+              className="h-20 mx-auto"
             />
           </div>
-          
-          <h2 className="text-2xl font-semibold mb-6">
-            Welcome to the Future of Radiology Training
-          </h2>
-          
-          <p className="text-lg mb-8 text-blue-100">
-            RadSim is an innovative platform designed to enhance radiology education through interactive case studies and real-time feedback.
-          </p>
-          
-          <div className="space-y-6">
-            <div className="flex items-start">
-              <GraduationCap className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Interactive Learning</h3>
-                <p className="text-blue-100">Practice with real clinical cases and receive immediate, personalized feedback on your interpretations.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <BookOpen className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Comprehensive Cases</h3>
-                <p className="text-blue-100">Access a growing library of carefully curated cases covering various radiological findings and pathologies.</p>
-              </div>
-            </div>
-            
-            <div className="flex items-start">
-              <Award className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-semibold mb-1">Track Your Progress</h3>
-                <p className="text-blue-100">Monitor your learning journey with detailed performance analytics and improvement metrics.</p>
-              </div>
-            </div>
-          </div>
         </div>
-      </div>
 
-      {/* Right side - Auth form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="max-w-md w-full">
-          <div className="lg:hidden text-center mb-8">
-            <div className="bg-white rounded-xl p-6 shadow-md mb-6">
+        {/* Left side - Platform information */}
+        <div className="hidden lg:flex lg:w-1/2 bg-blue-600 p-8 relative overflow-hidden">
+          <div className="relative z-10 max-w-2xl mx-auto flex flex-col justify-center h-full">
+            <div className="bg-white rounded-2xl p-8 shadow-xl mb-12 transform hover:scale-105 transition-transform duration-300">
               <img 
                 src="https://i.imgur.com/e4dcEWm.png" 
                 alt="RadSim Logo" 
-                className="h-24 mx-auto"
+                className="h-32 mx-auto"
               />
             </div>
-            <p className="text-gray-600">
-              Welcome to the future of radiology training
-            </p>
-          </div>
 
-          <div className="bg-white p-8 rounded-lg shadow-md">
+            <h1 className="text-4xl font-bold text-white mb-6">
+              Transform Your Radiology Training
+            </h1>
+            
+            <p className="text-xl text-blue-100 mb-12">
+              Experience the next generation of interactive learning with real cases, instant feedback, and comprehensive analytics.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
+                <Brain className="h-8 w-8 text-blue-200 mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">AI-Powered Learning</h3>
+                <p className="text-blue-100">Advanced algorithms provide personalized feedback and adaptive learning paths.</p>
+              </div>
+              
+              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
+                <Stethoscope className="h-8 w-8 text-blue-200 mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">Clinical Focus</h3>
+                <p className="text-blue-100">Real-world cases curated by experienced radiologists for practical learning.</p>
+              </div>
+              
+              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
+                <LineChart className="h-8 w-8 text-blue-200 mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">Progress Tracking</h3>
+                <p className="text-blue-100">Detailed analytics and insights to monitor your learning journey.</p>
+              </div>
+              
+              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
+                <Award className="h-8 w-8 text-blue-200 mb-4" />
+                <h3 className="text-lg font-semibold text-white mb-2">Certification Ready</h3>
+                <p className="text-blue-100">Structured learning paths aligned with certification requirements.</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Background decoration */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800" style={{ opacity: 0.9 }}></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1)_0%,transparent_70%)]"></div>
+        </div>
+
+        {/* Right side - Auth form */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="w-full max-w-md">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </h2>
@@ -160,7 +163,7 @@ export function Auth() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200"
                   placeholder="you@example.com"
                 />
               </div>
@@ -180,7 +183,7 @@ export function Auth() {
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordFocus(true)}
                     onBlur={() => setPasswordFocus(false)}
-                    className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10"
+                    className="block w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm pr-10 transition-colors duration-200"
                     placeholder="Enter your password"
                   />
                   <button
@@ -220,11 +223,11 @@ export function Auth() {
               <button
                 type="submit"
                 disabled={loading || (isSignUp && !allRequirementsMet)}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-md text-sm font-medium text-white transition-all duration-200 ${
                   loading || (isSignUp && !allRequirementsMet)
                     ? 'bg-blue-400 cursor-not-allowed'
-                    : 'bg-blue-600 hover:bg-blue-700'
-                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-lg'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:-translate-y-0.5`}
               >
                 {loading ? (
                   <div className="flex items-center">
@@ -247,7 +250,7 @@ export function Auth() {
                     setError(null);
                     setPassword('');
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-500"
+                  className="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200"
                 >
                   {isSignUp
                     ? 'Already have an account? Sign in'
@@ -256,6 +259,13 @@ export function Auth() {
               </div>
             </form>
           </div>
+          
+          <p className="mt-8 text-center text-sm text-gray-500">
+            By signing {isSignUp ? 'up' : 'in'}, you agree to our{' '}
+            <a href="#" className="text-blue-600 hover:text-blue-700">Terms of Service</a>{' '}
+            and{' '}
+            <a href="#" className="text-blue-600 hover:text-blue-700">Privacy Policy</a>
+          </p>
         </div>
       </div>
     </div>
