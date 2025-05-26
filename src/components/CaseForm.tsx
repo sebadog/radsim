@@ -253,7 +253,7 @@ const CaseForm: React.FC = () => {
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">
-            Expected Findings
+            Findings that should be mentioned in the final impression of the report
           </label>
           {formData.expectedFindings.map((finding, index) => (
             <div key={`finding-${index}`} className="flex mb-2">
@@ -286,7 +286,7 @@ const CaseForm: React.FC = () => {
         
         <div>
           <label className="block text-gray-700 font-medium mb-2">
-            Additional Findings (Optional)
+            Optional Findings (present but not essential for the impression)
           </label>
           {formData.additionalFindings.map((finding, index) => (
             <div key={`additional-${index}`} className="flex mb-2">
@@ -319,7 +319,7 @@ const CaseForm: React.FC = () => {
         
         <div>
           <label htmlFor="summaryOfPathology" className="block text-gray-700 font-medium mb-2">
-            Summary of Pathology
+            Correct final impression of the report
           </label>
           <textarea
             id="summaryOfPathology"
