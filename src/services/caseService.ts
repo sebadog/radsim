@@ -11,6 +11,7 @@ export interface CaseFormData {
   clinicalInfo: string;
   expectedFindings: string[];
   additionalFindings: string[];
+  summaryOfPathology: string;
   imageUrl: string;
   surveyUrl: string;
 }
@@ -82,6 +83,7 @@ export async function createCase(caseData: CaseFormData): Promise<Case> {
   try {
     const title = caseData.title?.trim();
     const clinicalInfo = caseData.clinicalInfo?.trim();
+    const summaryOfPathology = caseData.summaryOfPathology?.trim();
     const expectedFindings = caseData.expectedFindings.filter(f => f.trim());
     const additionalFindings = caseData.additionalFindings.filter(f => f.trim());
 
@@ -101,6 +103,7 @@ export async function createCase(caseData: CaseFormData): Promise<Case> {
         clinical_info: clinicalInfo,
         expected_findings: expectedFindings,
         additional_findings: additionalFindings,
+        summary_of_pathology: summaryOfPathology,
         images: imageUrls,
         survey_url: caseData.surveyUrl
       }])
@@ -127,6 +130,7 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<Ca
   try {
     const title = caseData.title?.trim();
     const clinicalInfo = caseData.clinicalInfo?.trim();
+    const summaryOfPathology = caseData.summaryOfPathology?.trim();
     const expectedFindings = caseData.expectedFindings.filter(f => f.trim());
     const additionalFindings = caseData.additionalFindings.filter(f => f.trim());
 
@@ -141,6 +145,7 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<Ca
         clinical_info: clinicalInfo,
         expected_findings: expectedFindings,
         additional_findings: additionalFindings,
+        summary_of_pathology: summaryOfPathology,
         images: imageUrls,
         survey_url: caseData.surveyUrl,
         updated_at: new Date().toISOString()
