@@ -7,7 +7,7 @@ const supabase = createClient(
     auth: {
       autoRefreshToken: true,
       persistSession: true,
-      detectSessionInUrl: true,
+      detectSessionInUrl: false,
       flowType: 'pkce'
     }
   }
