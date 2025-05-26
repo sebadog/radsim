@@ -63,7 +63,7 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="min-h-screen bg-white">
       <div className="min-h-screen flex flex-col lg:flex-row">
         {/* Header for mobile */}
         <div className="lg:hidden bg-white shadow-sm p-6">
@@ -77,9 +77,9 @@ export function Auth() {
         </div>
 
         {/* Left side - Platform information */}
-        <div className="hidden lg:flex lg:w-1/2 bg-blue-600 p-8 relative overflow-hidden">
+        <div className="hidden lg:flex lg:w-1/2 bg-white p-8 relative overflow-hidden">
           <div className="relative z-10 max-w-2xl mx-auto flex flex-col justify-center h-full">
-            <div className="bg-white rounded-2xl p-8 shadow-xl mb-12 transform hover:scale-105 transition-transform duration-300">
+            <div className="bg-white rounded-2xl p-8 shadow-lg mb-12 transform hover:scale-105 transition-transform duration-300">
               <img 
                 src="https://i.imgur.com/e4dcEWm.png" 
                 alt="RadSim Logo" 
@@ -87,54 +87,50 @@ export function Auth() {
               />
             </div>
 
-            <h1 className="text-4xl font-bold text-white mb-6">
+            <h1 className="text-4xl font-bold text-gray-900 mb-6">
               Transform Your Radiology Training
             </h1>
             
-            <p className="text-xl text-blue-100 mb-12">
+            <p className="text-xl text-gray-600 mb-12">
               Experience the next generation of interactive learning with real cases, instant feedback, and comprehensive analytics.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
-                <Brain className="h-8 w-8 text-blue-200 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">AI-Powered Learning</h3>
-                <p className="text-blue-100">Advanced algorithms provide personalized feedback and adaptive learning paths.</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                <Brain className="h-8 w-8 text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">AI-Powered Learning</h3>
+                <p className="text-gray-600">Advanced algorithms provide personalized feedback and adaptive learning paths.</p>
               </div>
               
-              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
-                <Stethoscope className="h-8 w-8 text-blue-200 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Clinical Focus</h3>
-                <p className="text-blue-100">Real-world cases curated by experienced radiologists for practical learning.</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                <Stethoscope className="h-8 w-8 text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Clinical Focus</h3>
+                <p className="text-gray-600">Real-world cases curated by experienced radiologists for practical learning.</p>
               </div>
               
-              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
-                <LineChart className="h-8 w-8 text-blue-200 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Progress Tracking</h3>
-                <p className="text-blue-100">Detailed analytics and insights to monitor your learning journey.</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                <LineChart className="h-8 w-8 text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Progress Tracking</h3>
+                <p className="text-gray-600">Detailed analytics and insights to monitor your learning journey.</p>
               </div>
               
-              <div className="bg-blue-500 bg-opacity-20 backdrop-blur-lg rounded-xl p-6 border border-blue-400 border-opacity-20">
-                <Award className="h-8 w-8 text-blue-200 mb-4" />
-                <h3 className="text-lg font-semibold text-white mb-2">Certification Ready</h3>
-                <p className="text-blue-100">Structured learning paths aligned with certification requirements.</p>
+              <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
+                <Award className="h-8 w-8 text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Certification Ready</h3>
+                <p className="text-gray-600">Structured learning paths aligned with certification requirements.</p>
               </div>
             </div>
           </div>
-          
-          {/* Background decoration */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-800" style={{ opacity: 0.9 }}></div>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,rgba(255,255,255,0.1)_0%,transparent_70%)]"></div>
         </div>
 
         {/* Right side - Auth form */}
-        <div className="flex-1 flex items-center justify-center p-8">
+        <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-br from-blue-600 to-blue-800">
           <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-xl p-8 border border-white/20">
+              <h2 className="text-2xl font-bold text-white mb-2">
                 {isSignUp ? 'Create your account' : 'Welcome back'}
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-blue-100 mb-6">
                 {isSignUp 
                   ? 'Start your learning journey today'
                   : 'Sign in to continue your training'
@@ -152,7 +148,7 @@ export function Auth() {
 
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div>
-                  <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="email-address" className="block text-sm font-medium text-white">
                     Email address
                   </label>
                   <input
@@ -169,7 +165,7 @@ export function Auth() {
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label htmlFor="password" className="block text-sm font-medium text-white">
                     Password
                   </label>
                   <div className="mt-1 relative">
@@ -202,7 +198,7 @@ export function Auth() {
 
                 {isSignUp && (passwordFocus || password.length > 0) && (
                   <div className="space-y-2">
-                    <h4 className="text-sm font-medium text-gray-700">Password requirements:</h4>
+                    <h4 className="text-sm font-medium text-white">Password requirements:</h4>
                     <ul className="space-y-1">
                       {requirements.map((req, index) => (
                         <li key={index} className="flex items-center text-sm">
@@ -250,7 +246,7 @@ export function Auth() {
                       setError(null);
                       setPassword('');
                     }}
-                    className="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200"
+                    className="text-sm text-white hover:text-blue-200 transition-colors duration-200"
                   >
                     {isSignUp
                       ? 'Already have an account? Sign in'
@@ -260,11 +256,11 @@ export function Auth() {
               </form>
             </div>
             
-            <p className="mt-8 text-center text-sm text-gray-500">
+            <p className="mt-8 text-center text-sm text-blue-100">
               By signing {isSignUp ? 'up' : 'in'}, you agree to our{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700">Terms of Service</a>{' '}
+              <a href="#" className="text-white hover:text-blue-200">Terms of Service</a>{' '}
               and{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-700">Privacy Policy</a>
+              <a href="#" className="text-white hover:text-blue-200">Privacy Policy</a>
             </p>
           </div>
         </div>
