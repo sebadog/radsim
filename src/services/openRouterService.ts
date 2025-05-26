@@ -92,13 +92,13 @@ SHOW_EXPECTED: [true if score is 100]`;
 2. For missed findings:
    - Ask them to review specific areas without revealing the finding
    - Provide ONE clue per finding
-   - Never use words from the diagnosis in clues
-   - Do not reveal diagnoses in clues
+   - NEVER use words from the diagnosis in clues
+   - DO NOT reveal diagnoses/expected findings in clues, this is very important for the success of the aplication
 
 3. For misinterpreted findings:
    - Encourage considering other etiologies
    - Example: "Consider other possible etiologies for (finding)"
-   - Do not disclose the correct diagnosis
+   - Do not disclose the correct diagnosis or expected findings
 
 4. For extra findings:
    - If they describe findings not in Expected/Additional lists
@@ -187,7 +187,7 @@ Instructions:
    - If misinterpreted: Guide to consider other etiologies
    - If extra finding: Note it's not in expected/additional lists
 3. Provide ONE clue per missed finding
-4. Never reveal diagnoses in clues or feedback
+4. Never reveal diagnoses or expected findings in clues or feedback
 5. Use Socratic method to guide learning
 
 Format response as:
