@@ -28,7 +28,7 @@ export async function fetchCases(): Promise<Case[]> {
     .from('cases')
     .select(`
       *,
-      case_completion!inner (
+      case_completion!left (
         completed,
         completed_at
       )
