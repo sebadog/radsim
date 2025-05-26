@@ -64,7 +64,7 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-white">
       {/* Left side - Platform information */}
       <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white">
         <div className="max-w-md mx-auto">
@@ -118,7 +118,7 @@ export function Auth() {
           <div className="lg:hidden text-center mb-8">
             <img 
               src={logo}
-              alt="RadSim Logo" 
+              alt="RadSim Logo"
               className="h-16 mx-auto mb-4"
             />
             <p className="text-gray-600">
@@ -126,7 +126,7 @@ export function Auth() {
             </p>
           </div>
 
-          <div className="bg-white p-8 rounded-lg shadow-md">
+          <div className="bg-gray-50 p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </h2>
