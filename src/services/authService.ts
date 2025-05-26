@@ -13,7 +13,7 @@ export interface AuthUser {
 
 export async function resetPassword(email: string): Promise<void> {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${import.meta.env.VITE_APP_URL || window.location.origin}/reset-password/update`,
+    redirectTo: `${window.location.origin}/reset-password/update`,
   });
 
   if (error) {
