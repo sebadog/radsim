@@ -172,37 +172,14 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<Ca
 
 export async function deleteCase(id: string): Promise<void> {
   try {
-    // First delete all associated case_completion records
-    const { error: completionError } = await supabase
-      .from('case_completion')
-      .delete()
-      .eq('case_id', id);
+    // Start a transaction by using RPC
+    const { error: rpcError } = await supabase.rpc('delete_case_with_dependencies', {
+      case_id: id
+    });
 
-    if (completionError) {
-      console.error('Error deleting case completion records:', completionError);
-      throw new Error('Failed to delete case completion records');
-    }
-
-    // Then delete all associated user_progress records
-    const { error: progressError } = await supabase
-      .from('user_progress')
-      .delete()
-      .eq('case_id', id);
-
-    if (progressError) {
-      console.error('Error deleting user progress records:', progressError);
-      throw new Error('Failed to delete user progress records');
-    }
-
-    // Finally, delete the case itself
-    const { error: caseError } = await supabase
-      .from('cases')
-      .delete()
-      .eq('id', id);
-
-    if (caseError) {
-      console.error('Error deleting case:', caseError);
-      throw new Error('Failed to delete case');
+    if (rpcError) {
+      console.error('Error deleting case and dependencies:', rpcError);
+      throw new Error('Failed to delete case and its dependencies');
     }
   } catch (error) {
     console.error('Error in deleteCase:', error);
