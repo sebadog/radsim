@@ -131,7 +131,7 @@ export function Auth() {
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="w-full max-w-md">
             <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </h2>
             <p className="text-gray-600 mb-6">
@@ -258,6 +258,7 @@ export function Auth() {
                 </button>
               </div>
             </form>
+            </div>
           </div>
           
           <p className="mt-8 text-center text-sm text-gray-500">
@@ -268,6 +269,6 @@ export function Auth() {
           </p>
         </div>
       </div>
-    </div>
+   </div>
   );
 }
