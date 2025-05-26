@@ -409,11 +409,10 @@ function CaseViewer() {
 
         {showTeachingPoints && (
           <div className="mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Expected Findings:</h3>
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded space-y-2">
-              {currentCase.expected_findings.map((finding: string, index: number) => (
-                <p key={index}>{finding}</p>
-              ))}
+            <h3 className="font-medium text-gray-700 mb-2">Correct Impression:</h3>
+            <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+              <h4 className="font-medium mb-2">Summary of Pathology:</h4>
+              <p>{currentCase.summary_of_pathology}</p>
             </div>
           </div>
         )}

@@ -14,6 +14,7 @@ interface FeedbackRequest {
   expectedFindings: string[];
   caseTitle: string;
   clinicalInfo: string;
+  summaryOfPathology: string;
   accessionNumber: string;
   additionalFindings: string[];
   images: string[];
@@ -166,6 +167,7 @@ Case Information:
 Title: ${request.caseTitle}
 Accession Number: ${request.accessionNumber}
 Clinical Information: ${request.clinicalInfo}
+Summary of Pathology: ${request.summaryOfPathology}
 Number of Images: ${request.images?.length || 0}
 
 Expected Findings (${expectedFindings.length} findings, ${pointsPerFinding} points each):
