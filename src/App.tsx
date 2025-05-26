@@ -58,8 +58,8 @@ function App() {
       {user && (
         <header className="bg-blue-600 text-white p-4 shadow-md">
           <div className="w-full max-w-none px-4 flex justify-between items-center">
-            <h1 className="text-2xl font-bold flex items-center">
-              <Brain className="mr-2" /> RadSim
+            <h1 className="text-2xl font-bold">
+              RadSim
             </h1>
             <div className="flex items-center space-x-4">
               <div className="flex items-center text-sm">
