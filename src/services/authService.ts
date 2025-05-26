@@ -11,6 +11,28 @@ export interface AuthUser {
   role: 'user' | 'admin';
 }
 
+export async function resetPassword(email: string): Promise<void> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+
+  if (error) {
+    console.error('Error resetting password:', error.message);
+    throw new Error(error.message);
+  }
+}
+
+export async function updatePassword(newPassword: string): Promise<void> {
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword
+  });
+
+  if (error) {
+    console.error('Error updating password:', error.message);
+    throw new Error(error.message);
+  }
+}
+
 export async function signUp(email: string, password: string): Promise<AuthUser | null> {
   const { data: { user }, error } = await supabase.auth.signUp({
     email,

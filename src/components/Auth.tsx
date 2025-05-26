@@ -214,6 +214,15 @@ export function Auth() {
                   </div>
                 )}
 
+                {!isSignUp && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/reset-password')}
+                    className="text-sm text-white hover:text-blue-200 transition-colors duration-200 block mb-4"
+                  >
+                    Forgot your password?
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={loading || (isSignUp && !allRequirementsMet)}

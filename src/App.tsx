@@ -6,6 +6,7 @@ import CaseViewer from './components/CaseViewer';
 import Dashboard from './components/Dashboard';
 import CaseForm from './components/CaseForm';
 import { Auth } from './components/Auth';
+import { ResetPassword } from './components/ResetPassword';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { signOut } from './services/authService';
 
@@ -86,6 +87,7 @@ function App() {
       <main className="w-full max-w-none px-4 mt-4 flex-grow">
         <Routes>
           <Route path="/auth" element={<Auth />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/"
             element={
