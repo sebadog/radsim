@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
-import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
+import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
+import { fetchCaseById, fetchCases } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
 import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
 
@@ -28,7 +28,6 @@ function CaseViewer() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
-  const [completionUpdating, setCompletionUpdating] = useState(false);
   const [totalScore, setTotalScore] = useState<number>(0);
 
   const openRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -75,22 +74,6 @@ function CaseViewer() {
     
     loadCase();
   }, [caseId]);
-
-  const handleToggleCompleted = async () => {
-    try {
-      setCompletionUpdating(true);
-      const newCompletedStatus = !(currentCase?.completed || false);
-      await markCaseAsCompleted(caseId!, newCompletedStatus);
-      setCurrentCase({
-        ...currentCase,
-        completed: newCompletedStatus
-      });
-    } catch (err: any) {
-      setError(err.message || 'Failed to update case status');
-    } finally {
-      setCompletionUpdating(false);
-    }
-  };
 
   const handleSubmitImpression = async () => {
     const currentAttemptText = currentAttemptNumber === 1 ? firstAttempt : secondAttempt;
@@ -231,36 +214,9 @@ function CaseViewer() {
               {currentCase.case_number ? `Case ${currentCase.case_number}: ` : ''}{currentCase.title}
             </h2>
           </div>
-          
-          {currentCase.completed && (
-            <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-              <CheckCircle size={12} className="mr-1" /> Completed
-            </span>
-          )}
         </div>
         
         <div className="flex space-x-2">
-          <button 
-            onClick={handleToggleCompleted}
-            disabled={completionUpdating}
-            className={`px-3 py-1.5 rounded-md flex items-center ${
-              completionUpdating 
-                ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
-                : currentCase.completed 
-                  ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
-                  : 'bg-green-100 text-green-700 hover:bg-green-200'
-            }`}
-          >
-            {completionUpdating ? (
-              <Loader2 size={16} className="mr-1.5 animate-spin" />
-            ) : currentCase.completed ? (
-              <Circle size={16} className="mr-1.5" />
-            ) : (
-              <CheckCircle size={16} className="mr-1.5" />
-            )}
-            {currentCase.completed ? 'Mark as Incomplete' : 'Mark as Completed'}
-          </button>
-          
           <button 
             onClick={prevCase}
             disabled={currentCaseIndex === 0}
