@@ -69,7 +69,7 @@ export function Auth() {
         <div className="max-w-md mx-auto">
           <div className="flex items-center mb-8">
             <img 
-              src="https://i.imgur.com/YourLogoHere.png" 
+              src="https://i.imgur.com/e4dcEWm.png" 
               alt="RadSim Logo" 
               className="h-24 mb-4"
             />
