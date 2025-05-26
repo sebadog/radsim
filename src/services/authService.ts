@@ -20,8 +20,9 @@ export class AuthenticationError extends Error {
 
 export async function resetPassword(email: string): Promise<void> {
   try {
+    const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password/update`,
+      redirectTo: `${redirectUrl}/reset-password/update`,
     });
 
     if (error) throw error;
@@ -52,11 +53,12 @@ export async function updatePassword(newPassword: string): Promise<void> {
 
 export async function signUp(email: string, password: string): Promise<AuthUser> {
   try {
+    const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const { data: { user, session }, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth`
+        emailRedirectTo: `${redirectUrl}/auth`
       }
     });
 
