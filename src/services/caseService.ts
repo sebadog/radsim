@@ -17,9 +17,23 @@ export interface CaseFormData {
 }
 
 export async function fetchCases(): Promise<Case[]> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('No authenticated user');
+  }
+
+  // Fetch cases and their completion status for the current user
   const { data, error } = await supabase
     .from('cases')
-    .select('*')
+    .select(`
+      *,
+      case_completion!inner (
+        completed,
+        completed_at
+      )
+    `)
+    .eq('case_completion.user_id', user.id)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -27,14 +41,30 @@ export async function fetchCases(): Promise<Case[]> {
     throw new Error('Failed to fetch cases');
   }
 
-  return data || [];
+  return data.map(caseItem => ({
+    ...caseItem,
+    completed: caseItem.case_completion?.[0]?.completed || false
+  })) || [];
 }
 
 export async function fetchCaseById(id: string): Promise<Case | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('No authenticated user');
+  }
+
   const { data, error } = await supabase
     .from('cases')
-    .select('*')
+    .select(`
+      *,
+      case_completion!inner (
+        completed,
+        completed_at
+      )
+    `)
     .eq('id', id)
+    .eq('case_completion.user_id', user.id)
     .single();
 
   if (error) {
@@ -42,7 +72,10 @@ export async function fetchCaseById(id: string): Promise<Case | null> {
     throw new Error('Failed to fetch case');
   }
 
-  return data;
+  return data ? {
+    ...data,
+    completed: data.case_completion?.[0]?.completed || false
+  } : null;
 }
 
 export async function createCase(caseData: CaseFormData): Promise<Case> {
@@ -71,8 +104,7 @@ export async function createCase(caseData: CaseFormData): Promise<Case> {
         additional_findings: additionalFindings,
         summary_of_pathology: summaryOfPathology,
         images: imageUrls,
-        survey_url: caseData.surveyUrl,
-        completed: false
+        survey_url: caseData.surveyUrl
       }])
       .select()
       .single();
@@ -155,14 +187,22 @@ export async function deleteCase(id: string): Promise<void> {
 }
 
 export async function markCaseAsCompleted(id: string, completed: boolean): Promise<void> {
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    throw new Error('No authenticated user');
+  }
+
   try {
     const { error } = await supabase
-      .from('cases')
-      .update({ 
+      .from('case_completion')
+      .upsert({
+        user_id: user.id,
+        case_id: id,
         completed,
+        completed_at: completed ? new Date().toISOString() : null,
         updated_at: new Date().toISOString()
-      })
-      .eq('id', id);
+      });
 
     if (error) {
       console.error('Error updating case completion:', error);
