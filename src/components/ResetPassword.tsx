@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { resetPassword, updatePassword } from '../services/authService';
 import { Brain, X, Check } from 'lucide-react';
 
@@ -9,11 +9,11 @@ export function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
 
   // Check if we're in the update password phase (after clicking email link)
-  const isUpdatePhase = searchParams.has('type');
+  const isUpdatePhase = location.pathname.includes('/update');
 
   const requirements = [
     { text: 'At least 6 characters', met: newPassword.length >= 6 },

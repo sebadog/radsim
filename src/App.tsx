@@ -87,7 +87,7 @@ function App() {
       <main className="w-full max-w-none px-4 mt-4 flex-grow">
         <Routes>
           <Route path="/auth" element={<Auth />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/reset-password/*" element={<ResetPassword />} />
           <Route
             path="/"
             element={

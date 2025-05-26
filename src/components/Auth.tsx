@@ -217,7 +217,10 @@ export function Auth() {
                 {!isSignUp && (
                   <button
                     type="button"
-                    onClick={() => navigate('/reset-password')}
+                    onClick={() => {
+                      navigate('/reset-password');
+                      setError(null);
+                    }}
                     className="text-sm text-white hover:text-blue-200 transition-colors duration-200 block mb-4"
                   >
                     Forgot your password?
