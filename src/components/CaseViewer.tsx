@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
-import { fetchCaseById, fetchCases } from '../services/caseService';
+import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
+import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
 import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
+import { useAuth } from '../contexts/AuthContext';
 
 function CaseViewer() {
   const { caseId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   const [currentCase, setCurrentCase] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,7 @@ function CaseViewer() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [completionUpdating, setCompletionUpdating] = useState(false);
   const [totalScore, setTotalScore] = useState<number>(0);
 
   const openRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -109,6 +112,17 @@ function CaseViewer() {
           setTotalScore(100);
           setShowExpectedImpression(true);
           setShowTeachingPoints(true);
+          
+          // Mark case as completed on perfect score
+          try {
+            setCompletionUpdating(true);
+            await markCaseAsCompleted(caseId!, true);
+            setCurrentCase(prev => ({ ...prev, completed: true }));
+          } catch (err) {
+            console.error('Error marking case as completed:', err);
+          } finally {
+            setCompletionUpdating(false);
+          }
         } else {
           setCurrentAttemptNumber(2);
         }
@@ -131,6 +145,17 @@ function CaseViewer() {
         setTotalScore(result.score);
         setShowExpectedImpression(true);
         setShowTeachingPoints(true);
+        
+        // Mark case as completed after second attempt
+        try {
+          setCompletionUpdating(true);
+          await markCaseAsCompleted(caseId!, true);
+          setCurrentCase(prev => ({ ...prev, completed: true }));
+        } catch (err) {
+          console.error('Error marking case as completed:', err);
+        } finally {
+          setCompletionUpdating(false);
+        }
       }
     } catch (error: any) {
       console.error('Error submitting impression:', error);
@@ -140,11 +165,22 @@ function CaseViewer() {
     }
   };
 
-  const handleGiveUp = () => {
+  const handleGiveUp = async () => {
     setGaveUp(true);
     setShowExpectedImpression(true);
     setShowTeachingPoints(true);
     setScore(0);
+    
+    // Mark case as completed when giving up
+    try {
+      setCompletionUpdating(true);
+      await markCaseAsCompleted(caseId!, true);
+      setCurrentCase(prev => ({ ...prev, completed: true }));
+    } catch (err) {
+      console.error('Error marking case as completed:', err);
+    } finally {
+      setCompletionUpdating(false);
+    }
   };
 
   const resetCase = () => {
@@ -214,6 +250,12 @@ function CaseViewer() {
               {currentCase.case_number ? `Case ${currentCase.case_number}: ` : ''}{currentCase.title}
             </h2>
           </div>
+          
+          {currentCase.completed && (
+            <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <CheckCircle size={12} className="mr-1" /> Completed
+            </span>
+          )}
         </div>
         
         <div className="flex space-x-2">
