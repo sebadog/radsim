@@ -197,13 +197,19 @@ export async function markCaseAsCompleted(caseId: string, completed: boolean): P
   try {
     const { error } = await supabase
       .from('case_completion')
-      .upsert({
-        user_id: user.id,
-        case_id: caseId,
-        completed,
-        completed_at: completed ? new Date().toISOString() : null,
-        updated_at: new Date().toISOString()
-      });
+      .upsert(
+        {
+          user_id: user.id,
+          case_id: caseId,
+          completed,
+          completed_at: completed ? new Date().toISOString() : null,
+          updated_at: new Date().toISOString()
+        },
+        {
+          onConflict: 'user_id,case_id',
+          ignoreDuplicates: false
+        }
+      );
 
     if (error) {
       console.error('Error updating case completion:', error);
