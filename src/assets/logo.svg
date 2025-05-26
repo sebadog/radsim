@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M200 300 L250 300 L250 250 L300 250" stroke="#4299E1" stroke-width="8"/>
-  <path d="M200 320 L250 320 L250 270 L300 270" stroke="#4299E1" stroke-width="8"/>
-  <path d="M200 340 L250 340 L250 290 L300 290" stroke="#4299E1" stroke-width="8"/>
-  <text x="300" y="400" fill="#4299E1" font-family="Arial" font-size="48" font-weight="bold">RadSim</text>
-  <text x="300" y="450" fill="#84CC16" font-family="Arial" font-size="32">PRACTICE SIMULATOR</text>
-  <path d="M350 200 C400 150, 450 150, 500 200 C550 250, 600 250, 650 200" stroke="#4299E1" stroke-width="8" fill="none"/>
+<svg width="800" height="600" version="1.1" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <path d="m100 300 c0 0 50 -100 150 -100 s150 100 200 100 s100 -50 150 -50 s100 50 100 50" fill="none" stroke="#4169e1" stroke-width="8"/>
+  <rect x="100" y="350" width="80" height="10" fill="#4169e1"/>
+  <rect x="100" y="380" width="120" height="10" fill="#4169e1"/>
+  <rect x="100" y="410" width="100" height="10" fill="#4169e1"/>
+  <rect x="100" y="440" width="140" height="10" fill="#4169e1"/>
+  <text x="100" y="500" font-family="Arial" font-size="64" fill="#87ceeb">RadSim</text>
+  <text x="100" y="550" font-family="Arial" font-size="32" fill="#90ee90">PRACTICE SIMULATOR</text>
+ </g>
 </svg>

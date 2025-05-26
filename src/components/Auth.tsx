@@ -72,7 +72,7 @@ export function Auth() {
             <img 
               src={logo}
               alt="RadSim Logo" 
-              className="h-24 mb-4"
+              className="h-32 mb-4"
             />
           </div>
           
@@ -119,7 +119,7 @@ export function Auth() {
             <img 
               src={logo}
               alt="RadSim Logo"
-              className="h-16 mx-auto mb-4"
+              className="h-24 mx-auto mb-4"
             />
             <p className="text-gray-600">
               Welcome to the future of radiology training
