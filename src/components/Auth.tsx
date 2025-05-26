@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
-import logo from '../assets/logo.svg';
 import { Eye, EyeOff, Check, X, GraduationCap, BookOpen, Award } from 'lucide-react';
 
 export function Auth() {
@@ -64,15 +63,15 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex bg-white">
+    <div className="min-h-screen flex bg-gray-50">
       {/* Left side - Platform information */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-white text-gray-800">
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white">
         <div className="max-w-md mx-auto">
           <div className="flex items-center mb-8">
             <img 
-              src={logo}
+              src="https://i.imgur.com/YourLogoHere.png" 
               alt="RadSim Logo" 
-              className="h-32 mb-4"
+              className="h-24 mb-4"
             />
           </div>
           
@@ -88,24 +87,24 @@ export function Auth() {
             <div className="flex items-start">
               <GraduationCap className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1 text-gray-900">Interactive Learning</h3>
-                <p className="text-gray-600">Practice with real clinical cases and receive immediate, personalized feedback on your interpretations.</p>
+                <h3 className="font-semibold mb-1">Interactive Learning</h3>
+                <p className="text-blue-100">Practice with real clinical cases and receive immediate, personalized feedback on your interpretations.</p>
               </div>
             </div>
             
             <div className="flex items-start">
               <BookOpen className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1 text-gray-900">Comprehensive Cases</h3>
-                <p className="text-gray-600">Access a growing library of carefully curated cases covering various radiological findings and pathologies.</p>
+                <h3 className="font-semibold mb-1">Comprehensive Cases</h3>
+                <p className="text-blue-100">Access a growing library of carefully curated cases covering various radiological findings and pathologies.</p>
               </div>
             </div>
             
             <div className="flex items-start">
               <Award className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1 text-gray-900">Track Your Progress</h3>
-                <p className="text-gray-600">Monitor your learning journey with detailed performance analytics and improvement metrics.</p>
+                <h3 className="font-semibold mb-1">Track Your Progress</h3>
+                <p className="text-blue-100">Monitor your learning journey with detailed performance analytics and improvement metrics.</p>
               </div>
             </div>
           </div>
@@ -117,16 +116,16 @@ export function Auth() {
         <div className="max-w-md w-full">
           <div className="lg:hidden text-center mb-8">
             <img 
-              src={logo}
-              alt="RadSim Logo"
-              className="h-24 mx-auto mb-4"
+              src="https://i.imgur.com/YourLogoHere.png" 
+              alt="RadSim Logo" 
+              className="h-16 mx-auto mb-4"
             />
             <p className="text-gray-600">
               Welcome to the future of radiology training
             </p>
           </div>
 
-          <div className="bg-gray-50 p-8 rounded-lg shadow-md">
+          <div className="bg-white p-8 rounded-lg shadow-md">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </h2>
