@@ -66,7 +66,7 @@ export function Auth() {
   return (
     <div className="min-h-screen flex bg-white">
       {/* Left side - Platform information */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white">
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-white text-gray-800">
         <div className="max-w-md mx-auto">
           <div className="flex items-center mb-8">
             <img 
@@ -88,24 +88,24 @@ export function Auth() {
             <div className="flex items-start">
               <GraduationCap className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1">Interactive Learning</h3>
-                <p className="text-blue-100">Practice with real clinical cases and receive immediate, personalized feedback on your interpretations.</p>
+                <h3 className="font-semibold mb-1 text-gray-900">Interactive Learning</h3>
+                <p className="text-gray-600">Practice with real clinical cases and receive immediate, personalized feedback on your interpretations.</p>
               </div>
             </div>
             
             <div className="flex items-start">
               <BookOpen className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1">Comprehensive Cases</h3>
-                <p className="text-blue-100">Access a growing library of carefully curated cases covering various radiological findings and pathologies.</p>
+                <h3 className="font-semibold mb-1 text-gray-900">Comprehensive Cases</h3>
+                <p className="text-gray-600">Access a growing library of carefully curated cases covering various radiological findings and pathologies.</p>
               </div>
             </div>
             
             <div className="flex items-start">
               <Award className="h-6 w-6 mr-4 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="font-semibold mb-1">Track Your Progress</h3>
-                <p className="text-blue-100">Monitor your learning journey with detailed performance analytics and improvement metrics.</p>
+                <h3 className="font-semibold mb-1 text-gray-900">Track Your Progress</h3>
+                <p className="text-gray-600">Monitor your learning journey with detailed performance analytics and improvement metrics.</p>
               </div>
             </div>
           </div>
