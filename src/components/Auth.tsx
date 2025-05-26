@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
+import logo from '../assets/logo.svg';
 import { Eye, EyeOff, Check, X, GraduationCap, BookOpen, Award } from 'lucide-react';
 
 export function Auth() {
@@ -69,7 +70,7 @@ export function Auth() {
         <div className="max-w-md mx-auto">
           <div className="flex items-center mb-8">
             <img 
-              src="https://i.imgur.com/YourLogoHere.png" 
+              src={logo}
               alt="RadSim Logo" 
               className="h-24 mb-4"
             />
@@ -116,7 +117,7 @@ export function Auth() {
         <div className="max-w-md w-full">
           <div className="lg:hidden text-center mb-8">
             <img 
-              src="https://i.imgur.com/YourLogoHere.png" 
+              src={logo}
               alt="RadSim Logo" 
               className="h-16 mx-auto mb-4"
             />
