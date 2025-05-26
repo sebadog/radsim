@@ -172,18 +172,7 @@ export async function updateCase(id: string, caseData: CaseFormData): Promise<Ca
 
 export async function deleteCase(id: string): Promise<void> {
   try {
-    // Delete all associated user_progress records first
-    const { error: progressError } = await supabase
-      .from('user_progress')
-      .delete()
-      .eq('case_id', id);
-
-    if (progressError) {
-      console.error('Error deleting user progress records:', progressError);
-      throw new Error('Failed to delete user progress records');
-    }
-
-    // Then delete all associated case_completion records
+    // First delete all associated case_completion records
     const { error: completionError } = await supabase
       .from('case_completion')
       .delete()
@@ -192,6 +181,17 @@ export async function deleteCase(id: string): Promise<void> {
     if (completionError) {
       console.error('Error deleting case completion records:', completionError);
       throw new Error('Failed to delete case completion records');
+    }
+
+    // Then delete all associated user_progress records
+    const { error: progressError } = await supabase
+      .from('user_progress')
+      .delete()
+      .eq('case_id', id);
+
+    if (progressError) {
+      console.error('Error deleting user progress records:', progressError);
+      throw new Error('Failed to delete user progress records');
     }
 
     // Finally, delete the case itself
