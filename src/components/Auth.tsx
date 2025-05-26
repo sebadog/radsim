@@ -65,13 +65,13 @@ export function Auth() {
   return (
     <div className="min-h-screen flex bg-gray-50">
       {/* Left side - Platform information */}
-      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white">
+      <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white relative">
         <div className="max-w-md mx-auto">
-          <div className="flex items-center mb-8">
+          <div className="flex items-center justify-center mb-12 bg-white rounded-xl p-8 shadow-lg">
             <img 
               src="https://i.imgur.com/e4dcEWm.png" 
               alt="RadSim Logo" 
-              className="h-24 mb-4"
+              className="h-32"
             />
           </div>
           
@@ -115,11 +115,13 @@ export function Auth() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="max-w-md w-full">
           <div className="lg:hidden text-center mb-8">
-            <img 
-              src="https://i.imgur.com/YourLogoHere.png" 
-              alt="RadSim Logo" 
-              className="h-16 mx-auto mb-4"
-            />
+            <div className="bg-white rounded-xl p-6 shadow-md mb-6">
+              <img 
+                src="https://i.imgur.com/e4dcEWm.png" 
+                alt="RadSim Logo" 
+                className="h-24 mx-auto"
+              />
+            </div>
             <p className="text-gray-600">
               Welcome to the future of radiology training
             </p>
