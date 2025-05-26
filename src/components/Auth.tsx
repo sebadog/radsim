@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signIn, signUp } from '../services/authService';
 import { useAuth } from '../contexts/AuthContext';
-import { Brain, Eye, EyeOff, Check, X, GraduationCap, BookOpen, Award } from 'lucide-react';
+import { Eye, EyeOff, Check, X, GraduationCap, BookOpen, Award } from 'lucide-react';
 
 export function Auth() {
   const [email, setEmail] = useState('');
@@ -68,8 +68,11 @@ export function Auth() {
       <div className="hidden lg:flex lg:flex-1 lg:flex-col lg:justify-center lg:p-12 bg-blue-600 text-white">
         <div className="max-w-md mx-auto">
           <div className="flex items-center mb-8">
-            <Brain className="h-12 w-12 mr-4" />
-            <h1 className="text-4xl font-bold">RadSim</h1>
+            <img 
+              src="https://i.imgur.com/YourLogoHere.png" 
+              alt="RadSim Logo" 
+              className="h-24 mb-4"
+            />
           </div>
           
           <h2 className="text-2xl font-semibold mb-6">
@@ -112,10 +115,11 @@ export function Auth() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="max-w-md w-full">
           <div className="lg:hidden text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <Brain className="h-8 w-8 mr-2 text-blue-600" />
-              <h1 className="text-3xl font-bold text-gray-900">RadSim</h1>
-            </div>
+            <img 
+              src="https://i.imgur.com/YourLogoHere.png" 
+              alt="RadSim Logo" 
+              className="h-16 mx-auto mb-4"
+            />
             <p className="text-gray-600">
               Welcome to the future of radiology training
             </p>
