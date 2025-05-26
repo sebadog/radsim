@@ -79,13 +79,11 @@ export function Auth() {
         {/* Left side - Platform information */}
         <div className="hidden lg:flex lg:w-1/2 bg-white p-8 relative overflow-hidden">
           <div className="relative z-10 max-w-2xl mx-auto flex flex-col justify-center h-full">
-            <div className="bg-white rounded-2xl p-8 shadow-lg mb-12 transform hover:scale-105 transition-transform duration-300">
-              <img 
-                src="https://i.imgur.com/e4dcEWm.png" 
-                alt="RadSim Logo" 
-                className="h-32 mx-auto"
-              />
-            </div>
+            <img 
+              src="https://i.imgur.com/e4dcEWm.png" 
+              alt="RadSim Logo" 
+              className="h-64 mx-auto mb-12"
+            />
 
             <h1 className="text-4xl font-bold text-gray-900 mb-6">
               Transform Your Radiology Training
