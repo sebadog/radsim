@@ -2,7 +2,15 @@ import { createClient, User, AuthError, Session } from '@supabase/supabase-js';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
+  import.meta.env.VITE_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true,
+      flowType: 'pkce'
+    }
+  }
 );
 
 export interface AuthUser {
@@ -20,9 +28,8 @@ export class AuthenticationError extends Error {
 
 export async function resetPassword(email: string): Promise<void> {
   try {
-    const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${redirectUrl}/reset-password/update`,
+      redirectTo: `${window.location.origin}/reset-password/update`,
     });
 
     if (error) throw error;
@@ -53,12 +60,11 @@ export async function updatePassword(newPassword: string): Promise<void> {
 
 export async function signUp(email: string, password: string): Promise<AuthUser> {
   try {
-    const redirectUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const { data: { user, session }, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${redirectUrl}/auth`
+        emailRedirectTo: `${window.location.origin}/auth`
       }
     });
 
