@@ -97,25 +97,25 @@ export function Auth() {
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <Brain className="h-8 w-8 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">AI-Powered Learning</h3>
-                <p className="text-gray-600">Advanced algorithms provide personalized feedback and adaptive learning paths.</p>
+                <p className="text-gray-600">Intelligent feedback system that evaluates your diagnostic interpretations in real-time.</p>
               </div>
               
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <Stethoscope className="h-8 w-8 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Clinical Focus</h3>
-                <p className="text-gray-600">Real-world cases curated by experienced radiologists for practical learning.</p>
+                <p className="text-gray-600">Practice with interactive radiology cases featuring real clinical scenarios and findings.</p>
               </div>
               
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <LineChart className="h-8 w-8 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Progress Tracking</h3>
-                <p className="text-gray-600">Detailed analytics and insights to monitor your learning journey.</p>
+                <p className="text-gray-600">Track your case completion progress and diagnostic accuracy scores.</p>
               </div>
               
               <div className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <Award className="h-8 w-8 text-blue-600 mb-4" />
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Certification Ready</h3>
-                <p className="text-gray-600">Structured learning paths aligned with certification requirements.</p>
+                <p className="text-gray-600">Improve your diagnostic skills with comprehensive feedback and teaching points.</p>
               </div>
             </div>
           </div>
