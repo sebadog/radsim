@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
-import { fetchCaseById, fetchCases } from '../services/caseService';
+import { ChevronLeft, ChevronRight, Award, MessageSquare, ArrowLeft, Loader2, Eye, RefreshCw, CheckCircle, Circle, Lock, Clock, Calendar, User, ExternalLink, FileImage, FormInput } from 'lucide-react';
+import { fetchCaseById, fetchCases, markCaseAsCompleted } from '../services/caseService';
 import { cases as defaultCases } from '../data/cases';
 import { generateFeedback, generateSecondAttemptFeedback } from '../services/openRouterService';
 
@@ -28,6 +28,7 @@ function CaseViewer() {
   const [isLoading, setIsLoading] = useState(false);
   const [apiKeyMissing, setApiKeyMissing] = useState(false);
   const [gaveUp, setGaveUp] = useState(false);
+  const [completionUpdating, setCompletionUpdating] = useState(false);
   const [totalScore, setTotalScore] = useState<number>(0);
 
   const openRouterApiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
@@ -109,6 +110,10 @@ function CaseViewer() {
           setTotalScore(100);
           setShowExpectedImpression(true);
           setShowTeachingPoints(true);
+          
+          // Mark case as completed if perfect score
+          await markCaseAsCompleted(caseId!, true);
+          setCurrentCase(prev => ({ ...prev, completed: true }));
         } else {
           setCurrentAttemptNumber(2);
         }
@@ -131,6 +136,10 @@ function CaseViewer() {
         setTotalScore(result.score);
         setShowExpectedImpression(true);
         setShowTeachingPoints(true);
+        
+        // Mark case as completed after second attempt
+        await markCaseAsCompleted(caseId!, true);
+        setCurrentCase(prev => ({ ...prev, completed: true }));
       }
     } catch (error: any) {
       console.error('Error submitting impression:', error);
@@ -140,14 +149,22 @@ function CaseViewer() {
     }
   };
 
-  const handleGiveUp = () => {
+  const handleGiveUp = async () => {
     setGaveUp(true);
     setShowExpectedImpression(true);
     setShowTeachingPoints(true);
     setScore(0);
+    
+    // Mark case as completed when giving up
+    try {
+      await markCaseAsCompleted(caseId!, true);
+      setCurrentCase(prev => ({ ...prev, completed: true }));
+    } catch (error) {
+      console.error('Error marking case as completed:', error);
+    }
   };
 
-  const resetCase = () => {
+  const resetCase = async () => {
     setFirstAttempt('');
     setFirstAttemptFeedback(null);
     setFirstAttemptScore(null);
@@ -158,6 +175,14 @@ function CaseViewer() {
     setScore(null);
     setShowTeachingPoints(false);
     setGaveUp(false);
+    
+    // Mark case as incomplete when resetting
+    try {
+      await markCaseAsCompleted(caseId!, false);
+      setCurrentCase(prev => ({ ...prev, completed: false }));
+    } catch (error) {
+      console.error('Error marking case as incomplete:', error);
+    }
   };
 
   const nextCase = () => {
@@ -214,6 +239,12 @@ function CaseViewer() {
               {currentCase.case_number ? `Case ${currentCase.case_number}: ` : ''}{currentCase.title}
             </h2>
           </div>
+          
+          {currentCase.completed && (
+            <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+              <CheckCircle size={12} className="mr-1" /> Completed
+            </span>
+          )}
         </div>
         
         <div className="flex space-x-2">
@@ -388,8 +419,9 @@ function CaseViewer() {
           
           <button
             onClick={resetCase}
-            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center"
           >
+            <RefreshCw className="mr-2" size={18} />
             Reset Case
           </button>
         </div>
